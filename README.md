@@ -1,1 +1,1 @@
-# GymCommunity
+# GYM-COMMUNITY
