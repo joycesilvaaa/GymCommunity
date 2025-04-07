@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Center, Input, Stack, View, Button, Icon, Pressable, Text, VStack } from 'native-base';
-import { Alert } from 'react-native';
+import { Alert, StatusBar } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 import { AuthContext } from '@/context/auth';
@@ -29,7 +29,8 @@ export function Login({ navigation }: InitialProps) {
     return emailRegex.test(email);
   }
   return (
-
+    <>
+    <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
     <View flex={1} margin={4} padding={1}>
       <Center justifyContent="center" flex={1}>
         <Icon as={<MaterialIcons name="fitness-center" />} size={90} color="indigo.600" />
@@ -77,6 +78,6 @@ export function Login({ navigation }: InitialProps) {
         </VStack>
       </Center>
     </View>
-
+    </>
   );
 }

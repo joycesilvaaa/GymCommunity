@@ -68,7 +68,7 @@ export function Home({ navigation }: HomeProps) {
   }
   async function getExpiringDiet() {
     if (!user?.id) return navigation.navigate('initial');
-    const response = await routes.expiringDiet(user.id);
+    const response = await routes.expiringDiet();
     console.log(response.data.data);
     setExpiringDiet(response.data.data.length);
   }
@@ -123,7 +123,7 @@ export function Home({ navigation }: HomeProps) {
       type: 'Dietas a Vencer',
       description: `Quantidade de dietas: ${expiringDiet}`,
       icon: <MaterialIcons name="event" />,
-      screen: expiringDiet > 0 ?'ExpiringDiet': 'Home',
+      screen: 'ExpiringDiet',
     },
     {
       type: 'Dietas Gratuitas',
@@ -162,6 +162,7 @@ export function Home({ navigation }: HomeProps) {
       type: 'Adicionar Treino Gratuito',
       description: 'Adicione um treino gratuito para a comunidade',
       icon: <MaterialIcons name="add" />,
+      screen: "CreateWorkout",
     },
   ];
 

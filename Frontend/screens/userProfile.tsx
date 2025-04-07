@@ -1,8 +1,8 @@
 import { Layout } from '@/components/layout';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
-import { Box, Text, Icon, View, Center } from 'native-base';
-import { Pressable } from 'react-native';
+import { Box, Text, Icon, View, Center, Avatar, Button, Badge, HStack, VStack, useColorModeValue } from 'native-base';
+import { Pressable, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import routes from '@/api/api';
@@ -14,16 +14,19 @@ type UserProfileProps = {
 };
 
 export function UserProfile({ navigation, route }: UserProfileProps) {
+
   const id = route.params?.id;
   const context = useAuth();
   const user = context.user;
   const previousRoute = navigation.getState()?.routes[navigation.getState().index - 1]?.name;
   const [typeView, setTypeView] = useState<string>('default');
-  const [userProfile, setUserProfile] = useState<IUserDetails| null>(null);
-
+  const [userProfile, setUserProfile] = useState<IUserDetails | null>(null);
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.800', 'white');
   useEffect(() => {
     if (previousRoute === 'ExpiringDiet' || previousRoute === 'ManangerClients') {
       setTypeView('expiring');
+      getUser()
     } else {
       setTypeView('default');
     }
@@ -33,10 +36,26 @@ export function UserProfile({ navigation, route }: UserProfileProps) {
     getUser();
   }, [route]);
 
+  async function removeClient() {
+    try{
+      const response = await routes.removeClient(id);
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Vínculo removido com sucesso!');
+        navigation.navigate('ManangerClients');
+      } else {
+        Alert.alert('Erro', 'Não foi possível remover o vínculo.');
+      }
+    }catch (error) {
+      console.error('Error removing client:', error);
+      Alert.alert('Erro', 'Não foi possível remover o vínculo.');
+    }
+  }
+  
   async function getUser() {
     try {
-      const response = await routes.userDetails(id);
-      setUserProfile(response.data);
+      const response = await routes.userDetails(typeView === 'expiring' ? id : user?.id);
+     
+      setUserProfile(response.data.data);
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }}
@@ -49,81 +68,151 @@ export function UserProfile({ navigation, route }: UserProfileProps) {
     if (userProfile?.user_diets_id) {
       navigation.navigate('ViewDiets', { id: userProfile.user_diets_id });
     } else {
-      alert('Você não possui nenhuma dieta atual.');
+      Alert.alert('Atenção', 'Você não possui nenhuma dieta atual.');
     }
   }
   function handleViewWorkout() {
     if (userProfile?.user_diets_id) {
       navigation.navigate('ViewWorkout', { id: userProfile.user_training_id });
     } else {
-      alert('Você não possui nenhum treino atual.');
+      Alert.alert('Atenção', 'Você não possui nenhum treino atual.');
     }
   }
+  // ... (manter useEffect e funções existentes)
 
   return (
     <Layout navigation={navigation}>
-      <View flexDirection="row" justifyContent="space-between">
-        <Box alignItems="center" padding={2} flex={0.5}>
-          <Box width={90} height={90} borderRadius={75} backgroundColor="gray.200" justifyContent="center" alignItems="center">
-            <Icon as={MaterialIcons} name="person" size="4xl" color="indigo.500" />
-          </Box>
-          <Text fontSize="lg" fontWeight="bold" mt={2}>{userProfile?.name}</Text>
-          {typeView === 'default' && user?.user_profile === 1 && (
-            <Pressable onPress={handleLogout}>
-              <Box mt={4} p={2} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center" justifyContent="center">
-                <Icon as={MaterialIcons} name="logout" size="md" color="red.500" mr={2} />
-                <Text color="red.500" fontWeight="bold" fontSize="md">Logout</Text>
-              </Box>
-            </Pressable>
-          )}
-        </Box>
-        <View padding={2} flex={0.5}>
-          {typeView === 'expiring' ? (
-            <>
-              {user?.user_profile === 3 ? (
-                <Pressable onPress={() => navigation.navigate("CreateDiet")}>
-                  <Box mt={4} p={4} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center">
-                    <Icon as={MaterialIcons} name="folder" size="lg" color="gray.400" mr={3} />
-                    <Text color="gray.400" fontWeight="bold" fontSize="md">Nova Dieta</Text>
-                  </Box>
-                </Pressable>
-              ) : (
-                <Pressable onPress={() => navigation.navigate("CreateDiet")}>
-                  <Box mt={4} p={4} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center">
-                    <Icon as={MaterialIcons} name="folder" size="lg" color="gray.400" mr={3} />
-                    <Text color="gray.400" fontWeight="bold" fontSize="md">Novo Treino</Text>
-                  </Box>
-                </Pressable>
-              )}
-              <Pressable onPress={() => console.log('Remover vínculo de cliente')}>
-                <Box mt={4} p={4} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center">
-                  <Icon as={MaterialIcons} name="delete" size="lg" color="red.500" mr={3} />
-                  <Text color="red.500" fontSize="sm">Remover Aluno</Text>
-                </Box>
-              </Pressable>
-            </>
-          ):(
-            <>
-            <Pressable onPress={handleViewDiet}>
-            <Box mt={4} p={4} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center">
-              <Icon as={MaterialIcons} name="folder" size="lg" color="gray.400" mr={3} />
-              <Text color="gray.400" fontWeight="bold" fontSize="md">Dieta</Text>
-            </Box>
-          </Pressable>
-            <Pressable onPress={handleViewWorkout}>
-            <Box mt={4} p={4} borderWidth={1} borderColor="gray.300" borderRadius={10} backgroundColor="white" shadow={3} flexDirection="row" alignItems="center">
-              <Icon as={MaterialIcons} name="folder" size="lg" color="gray.400" mr={3} />
-              <Text color="gray.400" fontWeight="bold" fontSize="md">Treino</Text>
-            </Box>
-          </Pressable>
-            </>
-          )}
+      <View flex={1} p={4} bg={useColorModeValue('gray.50', 'gray.900')}>
+        {/* Profile Header */}
+        <Center>
+          <Avatar 
+            bg="indigo.500" 
+            size="2xl" 
+            source={{ uri: 'https://example.com/placeholder-avatar' }} // Substituir por URL real
+            borderWidth={2}
+            borderColor="indigo.100"
+          >
+            <Text fontSize="4xl" color="white">
+              {userProfile?.name?.[0]?.toUpperCase()}
+            </Text>
+          </Avatar>
           
-        </View>
-      </View>
-      <View padding={2} flex={1} margin={2}>
-        {/* Espaço reservado para publicação ou outra funcionalidade futura */}
+          <Text fontSize="2xl" fontWeight="bold" mt={4} color={textColor}>
+            {userProfile?.name}
+          </Text>
+          
+          <HStack space={2} mt={2}>
+            <Badge colorScheme="indigo" rounded="full" px={3} py={1}>
+              <Text fontWeight="bold">ID: {userProfile?.user_id}</Text>
+            </Badge>
+          </HStack>
+        </Center>
+
+        {/* Content Section */}
+        <VStack space={4} mt={8}>
+          {typeView === 'expiring' ? (
+            <ProfessionalSection 
+              navigation={navigation} 
+              user={user} 
+              onRemove={removeClient} 
+            />
+          ) : (
+            <ClientSection 
+              onViewDiet={handleViewDiet}
+              onViewWorkout={handleViewWorkout}
+              onLogout={handleLogout}
+              hasDiet={!!userProfile?.user_diets_id}
+              hasWorkout={!!userProfile?.user_training_id}
+            />
+          )}
+        </VStack>
       </View>
     </Layout>
   );
 }
+
+// Componentes Auxiliares
+const ProfessionalSection = ({ navigation, user, onRemove }: any) => (
+  <>
+    <ActionButton
+      icon="addfile"
+      title={user?.user_profile === 3 ? 'Criar Nova Dieta' : 'Criar Novo Treino'}
+      colorScheme="indigo"
+      onPress={() => navigation.navigate("CreateDiet")}
+    />
+
+    <ActionButton
+      icon="delete"
+      title="Remover Aluno"
+      colorScheme="red"
+      variant="outline"
+      onPress={onRemove}
+    />
+  </>
+);
+
+const ClientSection = ({ onViewDiet, onViewWorkout, onLogout, hasDiet, hasWorkout }: any) => (
+  <>
+    <VStack space={4}>
+      <PlanCard 
+        icon="book"
+        title="Dieta"
+        status={hasDiet ? 'Ativa' : 'Não Ativa'}
+        statusColor={hasDiet ? 'green' : 'red'}
+        onPress={onViewDiet}
+      />
+
+      <PlanCard 
+        icon="table"
+        title="Treino"
+        status={hasWorkout ? 'Ativo' : 'Não Ativo'}
+        statusColor={hasWorkout ? 'green' : 'red'}
+        onPress={onViewWorkout}
+      />
+    </VStack>
+
+    <Button 
+      mt={8}
+      leftIcon={<Icon as={AntDesign} name="logout" />}
+      colorScheme="gray"
+      variant="ghost"
+      onPress={onLogout}
+    >
+      Sair da Conta
+    </Button>
+  </>
+);
+
+const PlanCard = ({ icon, title, status, statusColor, onPress }: any) => (
+  <Pressable onPress={onPress}>
+    <View bg={useColorModeValue('white', 'gray.700')} p={4} borderRadius="xl" shadow={1}>
+      <HStack alignItems="center" space={4}>
+        <Icon as={AntDesign} name={icon} size="2xl" color="indigo.500" />
+        
+        <VStack flex={1}>
+          <Text fontSize="lg" fontWeight="semibold">{title}</Text>
+          <HStack alignItems="center">
+            <Box w={2} h={2} bg={`${statusColor}.500`} rounded="full" mr={2} />
+            <Text color={`${statusColor}.500`} fontSize="sm">{status}</Text>
+          </HStack>
+        </VStack>
+        
+        <Icon as={AntDesign} name="right" size="md" color="gray.400" />
+      </HStack>
+    </View>
+  </Pressable>
+);
+
+const ActionButton = ({ icon, title, colorScheme, variant = 'solid', onPress }: any) => (
+  <Button
+    leftIcon={<Icon as={AntDesign} name={icon} />}
+    colorScheme={colorScheme}
+    variant={variant}
+    _text={{ fontWeight: 'bold' }}
+    py={3}
+    borderRadius="lg"
+    onPress={onPress}
+  >
+    {title}
+  </Button>
+);

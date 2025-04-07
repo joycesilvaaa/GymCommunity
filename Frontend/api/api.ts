@@ -2,6 +2,8 @@ import {api }from "./config"
 import { login } from "../interfaces/auth";
 import { IShoppingList } from "@/interfaces/shoppingList";
 import { ICreateUser } from "@/interfaces/user";
+import { CreateDiet } from "@/interfaces/diet";
+import { AllFreeDiets } from "@/screens/allFreeDiets";
 
 const routes = {
     login: (form_data: login) => api.post(
@@ -22,6 +24,8 @@ const routes = {
     userProfile: (user_id: number) => api.get(`/user/${user_id}`),
     userDetails: (user_id: number) => api.get(`/user/detail/`, {
         params: { user_id: user_id }}),
+
+    removeClient: (user_id: number) => api.delete(`/user/${user_id}`),
     //dietas
     quantityFreeDiets: () => api.get("/diets/all-free-quantity"),
     actualDietPrevious: (user_id: number) => api.get("/diets/actual-previous",{
@@ -29,10 +33,13 @@ const routes = {
             user_id: user_id
         }
     }),
-    expiringDiet: (user_id: number) => api.get("/diets/expiring",{
-        params: {user_id: user_id}}),
+    expiringDiet: () => api.get("/diets/expiring"),
     dietActual: (user_id: number) => api.get(`/diets/actual`, { params: { user_id } }),
-
+    createDiet: (form_data: CreateDiet) => api.post("/diets/", form_data),
+    deleteDiet: (id: number) => api.delete(`/diets/${id}`),
+    freeDietsByProfissional: () => api.get("/diets/by-profissional"),
+    dietById: (id: number) => api.get(`/diets/${id}`,),
+    allFreeDiets: () => api.get("/diets/all-free"),
     //treinos
     quantityFreeWorkout: () => api.get("/workout-plans/all-free-quantity"),
     actualWorkoutPrevious: (user_id: number) => api.get("/workout-plans/actual-previous",{params: {user_id: user_id}}),

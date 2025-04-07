@@ -19,7 +19,7 @@ export function RetanguleCard({ type, description, navigation, icon, screen, rou
   };
 
   return (
-    <Box p={4} bg="gray.50" mb={4} shadow={2} borderRadius={5}>
+    <Box p={4} bg="gray.50" mb={4} shadow={2} borderRadius={10}>
       <Pressable onPress={handlePress}>
         <VStack space={3}>
           <HStack alignItems="center" justifyContent="space-between">

@@ -1,48 +1,21 @@
-// src/pages/ViewDiet.tsx
 import React, { useEffect, useState } from 'react';
-import { Box, FlatList, Text } from 'native-base'; // Usando FlatList do NativeBase
-import { MealItem } from '@/components/card/mealItem'; // Importando o componente MealItem
+import { Text, VStack, HStack, Button, Icon, useTheme, Spinner, Box, useColorModeValue } from 'native-base';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
-import { Button } from 'native-base'; // Importando o Button e Alert do NativeBase
-import { Alert } from 'react-native';
-interface Meal {
+import { Alert, SafeAreaView } from 'react-native';
+import { IViewDiet } from '@/interfaces/diet';
+import routes from '@/api/api';
+import { CustomNavigationProp } from '@/interfaces/navigation';
 
-  name: string;
-  options: string[];
-}
-
-interface Diet {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  meals: Meal[]; // As refeições dentro do campo meals
-}
-
-interface ViewDietProps {
-  navigation: any; // Navegação
-  route: any; // Rota da navegação
-}
-
-const loadMeals = (): Diet => {
-  return {
-    id: '1',
-    name: 'Dieta Para fortalecimento',
-    description: 'Dieta para fortalecimento muscular.',
-    duration: 1,
-    meals: [
-      {  name: 'Café da manhã', options: ['Opção 1', 'Opção 2'],  },
-      { name: 'Almoço', options: ['Opção 1', 'Opção 2'],},
-      { name: 'Jantar', options: ['Opção 1', 'Opção 2'], },
-    ],
-  };
-};
-
-export function ViewDiet({ navigation, route}: ViewDietProps) {
+export function ViewDiet({ navigation, route }: CustomNavigationProp) {
+  const { colors } = useTheme();
   const { id } = route.params;
   const previousRoute = navigation.getState()?.routes[navigation.getState().index - 1]?.name;
-  const [diet, setDiet] = useState<Diet | null>(null);
+  const [diet, setDiet] = useState<IViewDiet | null>(null);
   const [typeView, setTypeView] = useState<string>("default");
+  const cardBg = useColorModeValue('white', 'coolGray.800');
+  const textColor = useColorModeValue('coolGray.800', 'coolGray.100');
+
   useEffect(() => {
     if (previousRoute === "ExpiringDiet") {
       setTypeView('expiring');
@@ -50,11 +23,9 @@ export function ViewDiet({ navigation, route}: ViewDietProps) {
       setTypeView('default');
     }
   }, [previousRoute]);
-  
 
   useEffect(() => {
-    const dietData = loadMeals(); // Carrega os dados da dieta
-    setDiet(dietData); // Atualiza o estado com a dieta
+    getDiet();
   }, [id]);
 
   const handleFinish = () => {
@@ -63,40 +34,169 @@ export function ViewDiet({ navigation, route}: ViewDietProps) {
       "Você tem certeza que deseja finalizar esta dieta?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Confirmar", onPress: () => console.log("Dieta finalizada!") },
+        { text: "Confirmar", onPress: () => handleConfirmFinish() },
       ]
     );
   };
 
+  const handleConfirmFinish = async () => {
+    try {
+      // TODO: Implementar chamada API para finalizar dieta
+      console.log("Dieta finalizada com sucesso!");
+      navigation.goBack();
+    } catch (error) {
+      console.error('Erro ao finalizar dieta:', error);
+    }
+  };
+
+  async function getDiet() {
+    try {
+      const response = await routes.dietById(id);
+      console.log(response.data.data);
+      setDiet(response.data.data[0]);
+    } catch (error) {
+      console.error('Error fetching diet:', error);
+      Alert.alert('Erro', 'Não foi possível carregar a dieta');
+    }
+  }
+
+  const getMealIcon = (mealTitle: string) => {
+    const icons: { [key: string]: string } = {
+      'Café da Manhã': 'coffee',
+      'Almoço': 'food-fork-drink',
+      'Lanche': 'food-croissant',
+      'Jantar': 'silverware-fork-knife',
+    };
+    return icons[mealTitle] || 'food';
+  };
+
+  const getQuantityIcon = (type: string) => {
+    switch (type) {
+      case 'gramas': return 'weight-gram';
+      case 'quilos': return 'weight-kilogram';
+      case 'livre': return 'infinity';
+      default: return 'numeric';
+    }
+  };
+
   if (!diet) {
-    return <Text>Carregando...</Text>; // Exibindo um texto de carregamento até a dieta estar pronta
+    return (
+      <Layout navigation={navigation}>
+        <VStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="lg" color="indigo.600" />
+          <Text mt={4} color="coolGray.600">Carregando dieta...</Text>
+        </VStack>
+      </Layout>
+    );
   }
 
   return (
     <Layout navigation={navigation}>
-      <Text fontSize="xl" color="indigo.700" fontWeight="bold" textAlign="center">
-        {diet.name}
-      </Text>
-      <Text fontSize="md" color="gray.600" textAlign="center" mb={4}>
-        {diet.description}
-      </Text>
-      
-      <Box flexDirection="row" justifyContent="center" alignItems="center" >
-        
-      {typeView === "expiring" ?(
-        <Button size="sm" colorScheme="indigo" width="40%" onPress={handleFinish}>
-        Finalizar
-      </Button>
-      ):(
-        <Button  variant={'outline'}  colorScheme="indigo" width="40%" onPress={() => navigation.goBack()}>
-          Voltar
-        </Button>
-      )}
-      </Box>
-      
-      {diet.meals.map((meal, index) => (
-        <MealItem key={index} meal={meal} navigation={navigation}/>
-      ))}
+      <SafeAreaView style={{ flex: 1 }}>
+        <VStack flex={1} p={4} space={4} bg="coolGray.50">
+          {/* Cabeçalho */}
+          <VStack space={2} mb={4}>
+            <Text fontSize="2xl" fontWeight="bold" color={textColor} textAlign="center">
+              {diet.title}
+            </Text>
+            <Text fontSize="md" color="coolGray.600" textAlign="center">
+              {diet.description}
+            </Text>
+          </VStack>
+
+          {/* Controles */}
+          <HStack justifyContent="center" space={3} mb={6}>
+            {typeView === "expiring" ? (
+              <Button
+                leftIcon={<MaterialIcons name="check-circle" size={20} color="white" />}
+                colorScheme="indigo"
+                borderRadius="lg"
+                shadow={2}
+                _text={{ fontWeight: 'semibold' }}
+                px={6}
+                py={3}
+                onPress={handleFinish}
+              >
+                Finalizar Dieta
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                leftIcon={<MaterialIcons name="arrow-back" size={20} color={colors.indigo[600]} />}
+                borderColor="indigo.600"
+                borderRadius="lg"
+                _text={{ color: "indigo.600", fontWeight: 'semibold' }}
+                px={6}
+                py={3}
+                onPress={() => navigation.goBack()}
+              >
+                Voltar
+              </Button>
+            )}
+          </HStack>
+
+          {/* Lista de Refeições */}
+          <VStack space={4}>
+            <Text fontSize="lg" fontWeight="semibold" color={textColor} pl={2}>
+              Refeições Diárias
+            </Text>
+
+            {diet.menu.map((meal, index) => (
+              <Box key={index} bg={cardBg} p={4} borderRadius="2xl" shadow={2}>
+                <HStack alignItems="center" space={3} mb={3}>
+                  <Icon
+                    as={MaterialCommunityIcons}
+                    name={getMealIcon(meal.title)}
+                    size={7}
+                    color="indigo.600"
+                  />
+                  <Text fontSize="lg" fontWeight="medium" color={textColor} textTransform="capitalize">
+                    {meal.title.toLowerCase()}
+                  </Text>
+                </HStack>
+
+                <VStack space={2}>
+                  {meal.options.map((option, optionIndex) => (
+                    <HStack
+                      key={optionIndex}
+                      justifyContent="space-between"
+                      alignItems="center"
+                      bg="coolGray.50"
+                      p={3}
+                      borderRadius="md"
+                      space={2}
+                    >
+                      <HStack space={3} alignItems="center" flex={1}>
+                        <Icon
+                          as={MaterialCommunityIcons}
+                          name={getQuantityIcon(option.type)}
+                          size={5}
+                          color="indigo.500"
+                        />
+                        <Text 
+                          color="coolGray.700" 
+                          flexShrink={1}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {option.name}
+                        </Text>
+                      </HStack>
+                      <Text color="coolGray.600" fontWeight="medium">
+                        {option.type === 'livre' ? (
+                          "Livre"
+                        ) : (
+                          `${option.quantity}${option.type === 'gramas' ? 'g' : option.type === 'quilos' ? 'kg' : 'un'}`
+                        )}
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            ))}
+          </VStack>
+        </VStack>
+      </SafeAreaView>
     </Layout>
   );
 }

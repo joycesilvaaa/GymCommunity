@@ -6,20 +6,33 @@ import { Layout } from '@/components/layout';
 import { Input } from 'native-base';
 import { ItemCard } from '@/components/card/customItemCard';
 import { useState } from 'react';
-interface MenuProps {
-  navigation: NavigationProp<any>;
-}
+import { CustomComponentProps } from 'native-base/lib/typescript/components/types';
+import { CustomNavigationProp } from '@/interfaces/navigation';
+import { IAllFreeDiets } from '@/interfaces/diet';
+import routes from '@/api/api';
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
 
-export function AllFreeDiets({ navigation }: MenuProps) {  
-    const [modalVisible, setModalVisible] = useState(false);
-    const diets = [
-        { id: 1, name: 'Dieta Low Carb', description: 'Uma dieta baixa em carboidratos.' },
-        { id: 2, name: 'Dieta Cetogênica', description: 'Uma dieta rica em gorduras e baixa em carboidratos.' },
-        { id: 3, name: 'Dieta Mediterrânea', description: 'Uma dieta baseada nos hábitos alimentares dos países mediterrâneos.' },
-    ];
+export function AllFreeDiets({ navigation }: CustomNavigationProp) {  
+    const [diets, setDiets] = useState<IAllFreeDiets[]>([]);
+    
+    useEffect(() => {
+            getDietsFreeByProfissional();   
+        }
+        , []);
+        
+    async function getDietsFreeByProfissional() {
+            try {
+                const response = await routes.allFreeDiets();
+                setDiets(response.data.data);
+            }
+            catch (error) {
+                console.error('Error fetching diets:', error);
+            }
+        }
     return (
         <Layout navigation={navigation} >
-            <View flex={1} margin={5} padding={1}>
+            <View flex={1} margin={4} padding={1}>
             <VStack space={4} alignItems="center" width="100%">
                 <Input
                 placeholder="Digite o nome da dieta"
@@ -38,7 +51,7 @@ export function AllFreeDiets({ navigation }: MenuProps) {
                 py={4}
                 />
             </VStack>
-            <View height={0.5} bg="gray.200" width="100%" my={4} />
+            <View height={0.5} bg="gray.200" width="100%" my={2} />
             <View flexDirection="row" justifyContent="space-between" alignItems="center" mb={4}>
                 <Text fontSize="xl" color="indigo.700" fontWeight="bold" textAlign="center">
                 Dietas
@@ -47,7 +60,7 @@ export function AllFreeDiets({ navigation }: MenuProps) {
             {diets.map((diet) => (
                 <ItemCard
                 key={diet.id}
-                title={diet.name}
+                title={diet.title}
                 description={diet.description}
                 navigation={navigation}
                 screen="ViewDiet"

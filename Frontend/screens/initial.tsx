@@ -1,4 +1,4 @@
-import { Button, View, Text, Icon, Center, VStack } from 'native-base';
+import { Button, View, Text, Icon, Center, VStack, StatusBar } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 
@@ -8,6 +8,8 @@ type InitialProps = {
 
 export function Initial({ navigation }: InitialProps) {
   return (
+    <>
+    <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
     <View flex={1} margin={5} padding={1}>
       <Center justifyContent="center" flex={1}>
         <Icon
@@ -44,5 +46,6 @@ export function Initial({ navigation }: InitialProps) {
         </VStack>
       </Center>
     </View>
+    </>
   );
 }

@@ -14,7 +14,7 @@ interface ItemCardProps {
 
 export function ItemCard({ title, description, navigation, screen, id, iconName }: ItemCardProps) {
   return (
-    <Box p={3} bg="white" mb={4} shadow={1} borderRadius={5}>
+    <Box p={3} bg="white" mb={3} shadow={1} borderRadius={10}>
       <Pressable onPress={() => navigation.navigate(screen, { id })}>
         <VStack space={3}>
           <HStack alignItems="center" justifyContent="space-between">

@@ -40,24 +40,7 @@ export function ShoppingList({ navigation }: ShoppingListProps) {
   const [optionName, setOptionName] = useState<string>('');
   const [optionQuantity, setOptionQuantity] = useState<string>('');
 
-  const [dietAtual, setDietAtual] = useState<Diet | null>({
-    id: 1,
-    menu: [
-      {
-        title: 'Refeição 1',
-        options: [
-          { name: 'Arroz', quantity: 500 },
-          { name: 'Feijão', quantity: 300 },
-          { name: 'Frango', quantity: 1000 },
-          { name: 'Batata', quantity: 2000 },
-        ],
-      },
-    ],
-    title: 'Dieta Exemplo',
-    description: 'Uma dieta balanceada para exemplo.',
-    start_date: '2023-01-01',
-    end_date: '2023-01-07',
-  });
+  const [dietAtual, setDietAtual] = useState<Diet | null>(null);
 
   function addOptions() {
     if (!optionName || !optionQuantity) {

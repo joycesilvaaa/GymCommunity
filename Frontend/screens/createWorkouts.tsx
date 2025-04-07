@@ -4,78 +4,61 @@ import { Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
 
-type ExerciseOption = {
-  id: number;
-  name: string;
-};
-
-type Exercise = {
-  type: string;
-  options: ExerciseOption[];
-  icon: string;
-};
-
-type Training = {
-  date: string;
-  exercises: Exercise[];
-};
+interface ICreateTraining {
+  plan: { title: string, exercises: { name: string, repetitions: number, duration: number }[] }[]
+  is_public: boolean
+  days_per_week: number
+  title: string
+  description: string
+}
 
 export default function CreateTraining({ navigation }: any) {
   const [trainingDate, setTrainingDate] = useState<string>('');
-  const [exerciseType, setExerciseType] = useState<string>('');
-  const [optionName, setOptionName] = useState<string>('');
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exerciseName, setExerciseName] = useState<string>('');
+  const [repetitions, setRepetitions] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [exercises, setExercises] = useState<{ name: string, repetitions: number, duration: number }[]>([]);
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number | null>(null);
 
-  function handleRemoveOption(exerciseIndex: number, optionId: number) {
-    const updatedExercises = exercises.map((exercise, index) =>
-      index === exerciseIndex
-        ? { ...exercise, options: exercise.options.filter((option) => option.id !== optionId) }
-        : exercise,
-    );
-
-    setExercises(updatedExercises);
-  }
-
+  // Função para adicionar um novo exercício ao plano
   function handleAddExercise() {
-    if (!exerciseType) {
-      Alert.alert('Erro', 'O tipo do exercício é obrigatório.');
+    if (!exerciseName || repetitions <= 0 || duration <= 0) {
+      Alert.alert('Erro', 'Todos os campos de exercício são obrigatórios.');
       return;
     }
 
-    setExercises([...exercises, { type: exerciseType, options: [], icon: '' }]);
-    setExerciseType('');
+    setExercises([
+      ...exercises,
+      { name: exerciseName, repetitions, duration }
+    ]);
+    setExerciseName('');
+    setRepetitions(0);
+    setDuration(0);
   }
 
-  function handleAddOption() {
-    if (!optionName || selectedExerciseIndex === null) {
-      Alert.alert('Erro', 'O nome da opção e a seleção do exercício são obrigatórios.');
-      return;
-    }
-
-    const updatedExercises = exercises.map((exercise, index) =>
-      index === selectedExerciseIndex
-        ? { ...exercise, options: [...exercise.options, { id: Date.now(), name: optionName }] }
-        : exercise,
-    );
-
-    setExercises(updatedExercises);
-    setOptionName('');
-  }
-
+  // Função para remover um exercício
   function handleRemoveExercise(index: number) {
     setExercises(exercises.filter((_, i) => i !== index));
     if (selectedExerciseIndex === index) setSelectedExerciseIndex(null);
   }
 
+  // Função para enviar o formulário de treinamento
   function handleSubmit() {
     if (exercises.length < 4 || !trainingDate) {
       Alert.alert('Erro', 'Adicione uma data e pelo menos 4 exercícios.');
       return;
     }
 
-    console.log('Treino criado:', { date: trainingDate, exercises });
-    Alert.alert('Sucesso', 'Treino criado com sucesso!');
+    const newTraining: ICreateTraining = {
+      plan: [{ title: 'Plano de Treinamento', exercises }],
+      is_public: true, // Ajuste conforme necessário
+      days_per_week: 5, // Ajuste conforme necessário
+      title: 'Novo Treinamento',
+      description: 'Descrição do Treinamento'
+    };
+
+    console.log('Treinamento criado:', newTraining);
+    Alert.alert('Sucesso', 'Treinamento criado com sucesso!');
     navigation.goBack();
   }
 
@@ -84,7 +67,7 @@ export default function CreateTraining({ navigation }: any) {
       <VStack flex={1} p={4} space={2}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text fontSize="xl" fontWeight="bold" color="indigo.600">
-            Criar Novo Treino
+            Criar Novo Treinamento
           </Text>
           {exercises.length >= 4 ? (
             <Button
@@ -102,13 +85,28 @@ export default function CreateTraining({ navigation }: any) {
           )}
         </HStack>
 
-        <Input placeholder="Data do Treino" value={trainingDate} onChangeText={setTrainingDate} />
+        <Input placeholder="Data do Treinamento" value={trainingDate} onChangeText={setTrainingDate} />
+
         <HStack space={1} alignItems="center">
           <Input
             flex={1}
-            placeholder="Tipo de Exercício"
-            value={exerciseType}
-            onChangeText={setExerciseType}
+            placeholder="Nome do Exercício"
+            value={exerciseName}
+            onChangeText={setExerciseName}
+          />
+          <Input
+            flex={1}
+            keyboardType="numeric"
+            placeholder="Repetições"
+            value={String(repetitions)}
+            onChangeText={(text) => setRepetitions(Number(text))}
+          />
+          <Input
+            flex={1}
+            keyboardType="numeric"
+            placeholder="Duração (em segundos)"
+            value={String(duration)}
+            onChangeText={(text) => setDuration(Number(text))}
           />
           <Button
             onPress={handleAddExercise}
@@ -125,29 +123,13 @@ export default function CreateTraining({ navigation }: any) {
               onPress={() => setSelectedExerciseIndex(index)}
               backgroundColor={selectedExerciseIndex === index ? '#D3D3D3' : '#f9f9f9'}
             >
-              <Text>{exercise.type}</Text>
+              <Text>{exercise.name}</Text>
             </Button>
-            {exercise.options.length === 0 && (
-              <Button backgroundColor="red.500" onPress={() => handleRemoveExercise(index)}>
-                <MaterialIcons name="delete" size={15} color="white" />
-              </Button>
-            )}
+            <Button backgroundColor="red.500" onPress={() => handleRemoveExercise(index)}>
+              <MaterialIcons name="delete" size={15} color="white" />
+            </Button>
           </HStack>
         ))}
-
-        <HStack space={1} alignItems="center">
-          <Input
-            flex={1}
-            placeholder="Nome da Opção"
-            value={optionName}
-            onChangeText={setOptionName}
-          />
-          <Button
-            onPress={handleAddOption}
-            colorScheme="indigo"
-            leftIcon={<MaterialIcons name="add" size={14} color="white" />}
-          />
-        </HStack>
       </VStack>
     </Layout>
   );

@@ -2,35 +2,26 @@ import { ExpiringDietCard } from "@/components/card/customExpiringDiet";
 import { Layout } from "@/components/layout";
 import { Text, View } from "react-native";
 import { NavigationProp } from '@react-navigation/native';
+import { CustomNavigationProp } from "@/interfaces/navigation";
+import routes from "@/api/api";
+import { IExpiringDiet } from "@/interfaces/diet";
+import { useState, useEffect } from "react";
 
-type ExiringDietsProps = {
-  navigation: NavigationProp<any>;
-};
+export function ExpiringDiet({ navigation }: CustomNavigationProp) {  
+    const [dietList, setDietList] = useState<IExpiringDiet[]>([]);
 
-export function ExpiringDiet({ navigation }: ExiringDietsProps) {  
-    const dietList = [
-        {
-            title: "Keto Diet",
-            description: "Low carb, high fat diet",
-            screen: "KetoScreen",
-            dietId: "1",
-            userId: "1",
-        },
-        {
-            title: "Vegan Diet",
-            description: "Plant-based diet",
-            screen: "VeganScreen",
-            dietId: "diet002",
-            userId: "user002",
-        },
-        {
-            title: "Mediterranean Diet",
-            description: "Rich in fruits, vegetables, and healthy fats",
-            screen: "MediterraneanScreen",
-            dietId: "diet003",
-            userId: "user003",
-        },
-    ];
+    useEffect(() => {
+        getExpiringDiet();
+    }, []);
+    async function getExpiringDiet() {
+        try {
+            const response = await routes.expiringDiet();
+            setDietList(response.data.data);
+        }
+        catch (error) {
+            console.error('Error fetching diets:', error);
+        }
+    }
 
     return (
         <Layout navigation={navigation}>  
@@ -41,10 +32,9 @@ export function ExpiringDiet({ navigation }: ExiringDietsProps) {
                         title={diet.title}
                         description={diet.description}
                         navigation={navigation}
-                        screen={diet.screen}
-                        dietId={diet.dietId.toString()}
+                        dietId={diet.diet_id.toString()}
                         iconName="restaurant"
-                        userId={diet.userId.toString()}
+                        userId={diet.user_id.toString()}
                     />
                 ))}
             </View>
