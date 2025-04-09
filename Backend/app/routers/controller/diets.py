@@ -11,6 +11,9 @@ from app.schemas.diet import (
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
+    DietsByProfissional,
+    AllFreeDiets,
+    AllExpiredDiets
 )
 from app.schemas.user import UserResponse
 from app.service.diets import DietService
@@ -62,7 +65,7 @@ class DietController:
 
     async def get_all_expiring_diets(
         self, user: UserResponse
-    ) -> BasicResponse[list[ExpiringDiets]]:
+    ) -> BasicResponse[list[AllExpiredDiets]]:
         try:
             expiring_diets = await self._service.get_all_expiring_diets(user.id)
             return BasicResponse(data=expiring_diets)
@@ -119,6 +122,26 @@ class DietController:
         try:
             await self._service.delete_diet(diet_id)
             return BasicResponse()
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise e
+
+    async def get_diets_by_profissional(
+        self, user: UserResponse
+    ) -> BasicResponse[list[DietsByProfissional]]:
+        try:
+            diets = await self._service.get_diets_by_professional(user.id)
+            return BasicResponse(data=diets)
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise e
+        
+    async def get_all_free_diets(self) -> BasicResponse[list[AllFreeDiets]]:
+        try:
+            diets = await self._service.get_all_free_diets()
+            return BasicResponse(data=diets)
         except HTTPException as e:
             raise e
         except Exception as e:

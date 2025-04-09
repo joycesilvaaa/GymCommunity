@@ -11,6 +11,9 @@ from app.schemas.diet import (
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
+    DietsByProfissional,
+    AllFreeDiets,
+    AllExpiredDiets,
 )
 
 
@@ -65,13 +68,16 @@ class DietService:
                 d.id,
                 d.menu,
                 d.title,
-                d.description
+                d.description,
+                d.is_public,
+                d.months_valid,
+                d.user_id
             from diets d
             where d.id = :id
         """).bindparams(bindparam("id", diet_id))
         result = await self._session.execute(query)
         diets = result.fetchall()
-        return [DietData(**dict(diet)) for diet in diets]
+        return [DietData(**diet._asdict()) for diet in diets]
 
     async def get_quantity_of_free_diets(self) -> AllFreeDietQuantity:
         query = text("""
@@ -87,27 +93,27 @@ class DietService:
             else AllFreeDietQuantity()
         )
 
-    async def get_all_expiring_diets(self, user_id: int) -> list[ExpiringDiets]:
+    async def get_all_expiring_diets(self, user_id: int) -> list[AllExpiredDiets]:
         query = text("""
-            select
+            SELECT
                 d.id,
                 d.title,
+                d.description,
                 ud.user_id,
-                ud.end_date - CURRENT_DATE AS days_remaining
-            from diets d
-            join user_diets ud
-                on d.id = ud.diet_id
-            join user_relations ur
-                on ud.user_id = ur.user_id
-            where ud.end_date between CURRENT_DATE
-                and CURRENT_DATE + '7 days'::interval
-                and ud.is_completed is false
-                and d.user_id = ur.professional_id
-                and ur.professional_id = :id
+                ud.diet_id,
+                (ud.end_date::DATE - CURRENT_DATE) AS days_remaining
+            FROM diets d
+            JOIN user_diets ud ON d.id = ud.diet_id
+            JOIN user_relations ur ON ud.user_id = ur.user_id
+            WHERE 
+                d.user_id = ur.professional_id 
+                AND ud.is_completed is false
+                AND ud.end_date::DATE BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
+                AND ur.professional_id = :id
         """).bindparams(bindparam("id", user_id))
         result = await self._session.execute(query)
         expiring_diets = result.fetchall()
-        return [ExpiringDiets(**dict(diet)) for diet in expiring_diets]
+        return [AllExpiredDiets(**diet._asdict()) for diet in expiring_diets]
 
     async def get_name_last_diet(self, user_id: int) -> list[LastFinishedDiet]:
         query = text("""
@@ -169,3 +175,32 @@ class DietService:
     async def delete_diet(self, diet_id: int) -> None:
         await self._session.execute(delete(Diets).where(Diets.id == diet_id))
         await self._session.commit()
+
+    async def get_diets_by_professional(self, user_id: int) -> list[DietsByProfissional]:
+        query = text("""
+            select
+                d.id,
+                d.title,
+                d.description
+            from diets d
+            join users u
+                on u.id = d.user_id 
+            where d.is_public is true 
+                and u.id = :id
+        """).bindparams(bindparam("id", user_id))
+        result = await self._session.execute(query)
+        diets = result.fetchall()
+        return [DietsByProfissional(**diet._asdict()) for diet in diets]
+    
+    async def get_all_free_diets(self) -> list[AllFreeDiets]:
+        query = text("""
+            select
+                d.id,
+                d.title,
+                d.description
+            from diets d
+            where d.is_public = true
+        """)
+        result = await self._session.execute(query)
+        diets = result.fetchall()
+        return [AllFreeDiets(**diet._asdict()) for diet in diets]
