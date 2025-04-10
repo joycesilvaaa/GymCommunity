@@ -8,18 +8,14 @@ import { StackActions } from "@react-navigation/routers";
 import { useNavigation } from "@react-navigation/native"; 
 import { Dict } from "native-base/lib/typescript/theme/tools";
 import { StackNavigationProp } from '@react-navigation/stack';
+import { User } from "@/interfaces/user";
 interface AuthContextProps {
     isAuthenticaded: boolean,
     login: (form_data: login) => void,
     logout: () => void,
     user: undefined | User
 }
-interface User {
-    id: number;
-    password: string;
-    email: string;
-    user_profile: number
-}
+
 type RootStackParamList = {
     Home: undefined;
     Login: undefined;

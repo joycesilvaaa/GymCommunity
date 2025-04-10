@@ -21,6 +21,7 @@ import { AllFreeWorkouts } from '@/screens/allFreeTraining';
 import { ViewTraining } from '@/screens/viewWorkout';
 import { AuthProvider } from '@/context/auth';
 import { useAuth } from '@/hooks/auth';
+import { UserConfig } from '@/screens/userConfig';
 
 const Stack = createStackNavigator();
 
@@ -91,6 +92,11 @@ export function StackNavigator() {
             <Stack.Screen
               name="ViewTraining"
               component={ViewTraining}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="UserConfig"
+              component={UserConfig}
               options={{ headerShown: false }}
             />
           </>

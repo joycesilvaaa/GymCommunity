@@ -8,6 +8,7 @@ from app.core.user_profile import UserProfile
 
 class UserResponse(BaseModel):
     id: int
+    name: str
     email: str
     password: str
     user_profile: int
@@ -21,10 +22,6 @@ class CreateUser(BaseModel):
     user_profile: int = UserProfile.COMMON_USER.value
     birth_date: datetime
     professional_id: int | None = None
-
-
-
-#adionionar logica para  caso venha um seja adicionado pelo user_profile, ele crie o vinculo com o profissional
     @field_validator("password", mode="before")
     def set_password(cls, value: str) -> str:
         from app.modules.security import PasswordManager
@@ -32,8 +29,6 @@ class CreateUser(BaseModel):
         return PasswordManager().password_hash(value)
     
     
-
-
 class UpdateUser(BaseModel):
     cpf: str | None = None
     email: str | None = None
@@ -60,3 +55,10 @@ class UserDetail(BaseModel):
     name: str
     user_training_id: int | None = None
     user_diets_id: int | None = None
+
+class UserInfoLogger(BaseModel):
+    id: int
+    name: str
+    user_profile: int 
+    email: str
+    

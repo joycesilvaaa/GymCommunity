@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.security import PasswordManager, TokenManager
 from app.schemas.auth import Token
 from app.service.user import UserService
+from app.schemas.user import UserInfoLogger
 
 
 class AuthService:
@@ -23,5 +24,6 @@ class AuthService:
             raise HTTPException(
                 status_code=400, detail="Nome de usuário ou senha incorretos"
             )
-        access_token = self.__token_manager.create_access_token(user)
+        user_logged = UserInfoLogger(**user.model_dump(exclude={"password"}))
+        access_token = self.__token_manager.create_access_token(user_logged)
         return Token(access_token=access_token, token_type="bearer")

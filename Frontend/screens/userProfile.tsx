@@ -16,8 +16,7 @@ type UserProfileProps = {
 export function UserProfile({ navigation, route }: UserProfileProps) {
 
   const id = route.params?.id;
-  const context = useAuth();
-  const user = context.user;
+
   const previousRoute = navigation.getState()?.routes[navigation.getState().index - 1]?.name;
   const [typeView, setTypeView] = useState<string>('default');
   const [userProfile, setUserProfile] = useState<IUserDetails | null>(null);
@@ -53,7 +52,7 @@ export function UserProfile({ navigation, route }: UserProfileProps) {
   
   async function getUser() {
     try {
-      const response = await routes.userDetails(typeView === 'expiring' ? id : user?.id);
+      const response = await routes.userDetails(typeView === 'expiring' ? id );
      
       setUserProfile(response.data.data);
     } catch (error) {

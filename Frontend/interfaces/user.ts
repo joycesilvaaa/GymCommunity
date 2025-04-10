@@ -16,7 +16,12 @@ export interface IUserListPrevious{
     email: string
     cpf: string
 }
-
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    user_profile: number
+}
 export interface IUserDetails {
     user_id: number
     name: string

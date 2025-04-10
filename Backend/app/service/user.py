@@ -20,7 +20,8 @@ class UserService:
                 id,
                 email,
                 password,
-                user_profile
+                user_profile,
+                "name" as name
             FROM users
             WHERE email = :email"""
         ).bindparams(bindparam("email", email))
@@ -34,7 +35,8 @@ class UserService:
                 id,
                 email,
                 password,
-                user_profile
+                user_profile, 
+                "name"
             FROM users
             WHERE id = :id
         """

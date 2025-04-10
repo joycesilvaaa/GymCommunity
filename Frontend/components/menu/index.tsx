@@ -57,7 +57,7 @@ export function MenuFooter({ navigation }: MenuProps) {
           flex={1}
           onPress={() => {
             setSelected(3);
-            navigation.navigate('UserProfile');
+            navigation.navigate('UserConfig');
           }}
         >
           <Center>
