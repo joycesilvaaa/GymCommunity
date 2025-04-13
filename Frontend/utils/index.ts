@@ -1,9 +1,9 @@
-export function formatarDataBrasil(data: string | Date): string {
+export function formatedDateBr(data: string | Date): string {
     const dataConvertida = new Date(data);
     return dataConvertida.toLocaleDateString('pt-BR');
   }
 
-  export function validarCPF(cpf: string): boolean {
+export function validateCpf(cpf: string): boolean {
     cpf = cpf.replace(/[^\d]/g, '');
 
     if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) {

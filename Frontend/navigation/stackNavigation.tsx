@@ -1,27 +1,30 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { Initial } from '@/screens/initial';
-import { Login } from '@/screens/login';
-import { CreateUser } from '@/screens/createUser';
-import { CreateProfissional } from '@/screens/createProfissional';
-import { Home } from '@/screens/home';
+import { Initial } from '@/screens/base/initial';
+import { Login } from '@/screens/base/login';
+import { CreateUser } from '@/screens/user/createUser';
+import { CreateProfissional } from '@/screens/user/createProfissional';
+import { Home } from '@/screens/base/home';
 import { MenuFooter } from '@/components/menu';
-import { ManagerClients } from '@/screens/managerClients';
-import { FreeDiets } from '@/screens/managerMyFreeDiets';
-import CreateDietScreen from '@/screens/createDiet';
-import { AllFreeDiets } from '@/screens/allFreeDiets';
-import { ViewDiet } from '@/screens/viewDiet';
-import { UserProfile } from '@/screens/userProfile';
-import { ExpiringDiet } from '@/screens/expiringDiet';
-import { ShoppingList } from '@/screens/createShoppingList';
-import { ListShopping } from '@/screens/listShopping';
-import { ViewShoppingList } from '@/screens/viewShoppingList';
-import CreateTraining from '@/screens/createWorkouts';
-import { AllFreeWorkouts } from '@/screens/allFreeTraining';
-import { ViewTraining } from '@/screens/viewWorkout';
+import { ManagerClients } from '@/screens/clients/managerClients';
+import { FreeDiets } from '@/screens/diets/managerMyFreeDiets';
+import CreateDietScreen from '@/screens/diets/createDiet';
+import { AllFreeDiets } from '@/screens/diets/allFreeDiets';
+import { ViewDiet } from '@/screens/diets/viewDiet';
+import { UserProfile } from '@/screens/user/userProfile';
+import { ExpiringDiet } from '@/screens/diets/expiringDiet';
+import { ShoppingList } from '@/screens/shoppingList/createShoppingList';
+import { ListShopping } from '@/screens/shoppingList/listShopping';
+import { ViewShoppingList } from '@/screens/shoppingList/viewShoppingList';
+import CreateTrainingScreen from '@/screens/workouts/createWorkouts';
+import { AllFreeWorkouts } from '@/screens/workouts/allFreeTraining';
+import { ViewTraining } from '@/screens/workouts/viewWorkout';
 import { AuthProvider } from '@/context/auth';
 import { useAuth } from '@/hooks/auth';
-import { UserConfig } from '@/screens/userConfig';
+import { UserConfig } from '@/screens/user/userConfig';
+import { NewClient } from '@/screens/clients/newClient';
+import ManagerAllFreeTraining from '@/screens/workouts/managerAllFreeTraining';
+import ExpiringWorkoutsScreen from '@/screens/workouts/expiringTraining';
 
 const Stack = createStackNavigator();
 
@@ -81,7 +84,7 @@ export function StackNavigator() {
             />
             <Stack.Screen
               name="CreateWorkout"
-              component={CreateTraining}
+              component={CreateTrainingScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -99,10 +102,24 @@ export function StackNavigator() {
               component={UserConfig}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+            name="NewClient"
+            component={NewClient}
+            options={{headerShown: false}}/>
+            <Stack.Screen
+              name="ManagerMyFreeTraining"
+              component={ManagerAllFreeTraining}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ExpiringWorkout"
+              component={ExpiringWorkoutsScreen}
+              options={{ headerShown: false }}
+            />
           </>
         ) : (
           <>
-            <Stack.Screen name="initial" component={Initial} options={{ headerShown: false }} />
+            <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
             <Stack.Screen
               name="CreateUser"

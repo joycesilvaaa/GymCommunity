@@ -5,9 +5,9 @@ import { Layout } from '@/components/layout';
 import { Alert, SafeAreaView } from 'react-native';
 import { IViewDiet } from '@/interfaces/diet';
 import routes from '@/api/api';
-import { CustomNavigationProp } from '@/interfaces/navigation';
+import { NavigationProps } from '@/interfaces/navigation';
 
-export function ViewDiet({ navigation, route }: CustomNavigationProp) {
+export function ViewDiet({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
   const { id } = route.params;
   const previousRoute = navigation.getState()?.routes[navigation.getState().index - 1]?.name;
@@ -41,8 +41,6 @@ export function ViewDiet({ navigation, route }: CustomNavigationProp) {
 
   const handleConfirmFinish = async () => {
     try {
-      // TODO: Implementar chamada API para finalizar dieta
-      console.log("Dieta finalizada com sucesso!");
       navigation.goBack();
     } catch (error) {
       console.error('Erro ao finalizar dieta:', error);
@@ -93,7 +91,7 @@ export function ViewDiet({ navigation, route }: CustomNavigationProp) {
   return (
     <Layout navigation={navigation}>
       <SafeAreaView style={{ flex: 1 }}>
-        <VStack flex={1} p={4} space={4} bg="coolGray.50">
+        <VStack flex={1} p={4} space={4} bg="gray.50">
           {/* Cabeçalho */}
           <VStack space={2} mb={4}>
             <Text fontSize="2xl" fontWeight="bold" color={textColor} textAlign="center">
@@ -104,7 +102,6 @@ export function ViewDiet({ navigation, route }: CustomNavigationProp) {
             </Text>
           </VStack>
 
-          {/* Controles */}
           <HStack justifyContent="center" space={3} mb={6}>
             {typeView === "expiring" ? (
               <Button

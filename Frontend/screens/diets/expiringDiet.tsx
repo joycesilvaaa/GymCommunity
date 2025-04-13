@@ -2,13 +2,13 @@ import { ExpiringDietCard } from "@/components/card/customExpiringDiet";
 import { Layout } from "@/components/layout";
 import { Text, View } from "react-native";
 import { NavigationProp } from '@react-navigation/native';
-import { CustomNavigationProp } from "@/interfaces/navigation";
+import { NavigationProps } from "@/interfaces/navigation";
 import routes from "@/api/api";
 import { IExpiringDiet } from "@/interfaces/diet";
 import { useState, useEffect } from "react";
 import { MaterialIcons } from '@expo/vector-icons';
 
-export function ExpiringDiet({ navigation }: CustomNavigationProp) {  
+export function ExpiringDiet({ navigation }: NavigationProps) {  
     const [dietList, setDietList] = useState<IExpiringDiet[]>([]);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -21,11 +21,6 @@ export function ExpiringDiet({ navigation }: CustomNavigationProp) {
         } finally {
             setRefreshing(false);
         }
-    };
-
-    const handleRefresh = () => {
-        setRefreshing(true);
-        loadData();
     };
 
     useEffect(() => {

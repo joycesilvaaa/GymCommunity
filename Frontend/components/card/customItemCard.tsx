@@ -4,12 +4,12 @@ import { NavigationProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface ItemCardProps {
-  title: string; // Nome do item (usuário, treino, dieta)
-  description: string; // Descrição dinâmica
-  screen: string; // Tela para navegar
+  title: string; 
+  description: string; 
+  screen: string;
   navigation: NavigationProp<any>;
-  id: string; // Identificador genérico
-  iconName: keyof typeof MaterialIcons.glyphMap; // Ícone dinâmico
+  id: string; 
+  iconName: keyof typeof MaterialIcons.glyphMap; 
 }
 
 export function ItemCard({ title, description, navigation, screen, id, iconName }: ItemCardProps) {

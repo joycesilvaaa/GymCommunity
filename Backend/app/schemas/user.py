@@ -6,29 +6,27 @@ from pydantic import BaseModel, field_validator
 from app.core.user_profile import UserProfile
 
 
-class UserResponse(BaseModel):
+class UserLogin(BaseModel):
     id: int
-    name: str
-    email: str
     password: str
-    user_profile: int
 
 
 class CreateUser(BaseModel):
-    name:str
+    name: str
     cpf: str
     email: str
     password: str
     user_profile: int = UserProfile.COMMON_USER.value
     birth_date: datetime
     professional_id: int | None = None
+
     @field_validator("password", mode="before")
     def set_password(cls, value: str) -> str:
         from app.modules.security import PasswordManager
 
         return PasswordManager().password_hash(value)
-    
-    
+
+
 class UpdateUser(BaseModel):
     cpf: str | None = None
     email: str | None = None
@@ -41,9 +39,9 @@ class UpdateUser(BaseModel):
         from app.modules.security import PasswordManager
 
         return PasswordManager().password_hash(value) if value else None
-    
 
-class UserClientsForProfessional(BaseModel):
+
+class ClientInfo(BaseModel):
     id: int
     name: str
     email: str
@@ -56,9 +54,9 @@ class UserDetail(BaseModel):
     user_training_id: int | None = None
     user_diets_id: int | None = None
 
-class UserInfoLogger(BaseModel):
+
+class UserInfo(BaseModel):
     id: int
     name: str
-    user_profile: int 
+    user_profile: int
     email: str
-    

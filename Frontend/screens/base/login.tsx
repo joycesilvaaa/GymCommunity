@@ -1,15 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Center, Input, Stack, View, Button, Icon, Pressable, Text, VStack } from 'native-base';
+import React, { useContext,  useState } from 'react';
+import { Center, Input,  View, Button, Icon, Pressable, Text, VStack } from 'native-base';
 import { Alert, StatusBar } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { NavigationProp } from '@react-navigation/native';
 import { AuthContext } from '@/context/auth';
-import { Home } from './home';
-type InitialProps = {
-  navigation: NavigationProp<any>;
-};
+import { NavigationProps } from '@/interfaces/navigation';
 
-export function Login({ navigation }: InitialProps) {
+
+export function Login({ navigation }: NavigationProps) {
   const authContext = useContext(AuthContext);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -71,7 +68,7 @@ export function Login({ navigation }: InitialProps) {
           <Button
             variant={'outline'}
             colorScheme={'indigo'}
-            onPress={() => navigation.navigate('initial')}
+            onPress={() => navigation.navigate('Initial')}
           >
             Voltar
           </Button>

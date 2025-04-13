@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { Alert, Image, TouchableOpacity } from 'react-native';
 import { Input, Button, Text, VStack, Icon, HStack, Box, IconButton } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker'; // Importando o expo-image-picker
-
+import * as ImagePicker from 'expo-image-picker'; 
 interface PostProps {
-    user: string; // Nome ou ID do usuário que fez a publicação
+    user: string; 
 }
 
 export const PostComponent = ({ user }: PostProps) => {
-    const [text, setText] = useState<string>(''); // Texto da publicação
-    const [imageUri, setImageUri] = useState<string | null>(null); // URI da imagem
-    const [likes, setLikes] = useState<number>(0); // Contagem de curtidas
+    const [text, setText] = useState<string>(''); 
+    const [imageUri, setImageUri] = useState<string | null>(null); 
+    const [likes, setLikes] = useState<number>(0); 
 
-    // Função para curtir a publicação
+   
     const handleLike = () => {
         setLikes(likes + 1);
     };

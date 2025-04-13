@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
-from app.schemas.user import UserResponse
+from app.schemas.user import UserInfo
 from app.schemas.workout_plans import (
     AllFreeWorkoutPlanQuantity,
     CreateWorkoutPlan,
@@ -12,6 +12,7 @@ from app.schemas.workout_plans import (
     ListWorkoutPlanActual,
     UpdateWorkoutPlan,
     WorkoutPlanData,
+    PreviousWorkoutPlan
 )
 from app.service.workout_plans import WorkoutPlanService
 
@@ -78,7 +79,7 @@ class WorkoutPlanController:
             )
 
     async def get_all_expiring_workout_plans(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[ExpiringWorkoutPlans]]:
         try:
             expiring_workout_plans = (
@@ -93,7 +94,7 @@ class WorkoutPlanController:
             )
 
     async def get_all_finished_workout_plans(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[WorkoutPlanData]]:
         try:
             finished_workout_plans = (
@@ -108,7 +109,7 @@ class WorkoutPlanController:
             )
 
     async def get_name_of_last_finished_workout_plan(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[LastFinishedWorkoutPlan]]:
         try:
             last_finished_workout_plan = (
@@ -123,7 +124,7 @@ class WorkoutPlanController:
             )
 
     async def create_workout_plan(
-        self, user: UserResponse, data: CreateWorkoutPlan
+        self, user: UserInfo, data: CreateWorkoutPlan
     ) -> BasicResponse[None]:
         try:
             await self._service.create_workout_plan(user.id, data)
@@ -135,6 +136,28 @@ class WorkoutPlanController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
 
+
+    async def get_all_free_workout_plans(
+            self, 
+    ) -> BasicResponse[list[PreviousWorkoutPlan]]:
+        try:
+            free_workout_plans = await self._service.get_all_free_workout_plans()
+            return BasicResponse(data=free_workout_plans)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            )
+        
+    async def get_all_free_workout_plan_by_professional(
+        self, user: UserInfo
+    ) -> BasicResponse[list[PreviousWorkoutPlan]]:
+        try:
+            workout_plan = await self._service.get_workout_plan_by_professional(user.id)
+            return BasicResponse(data=workout_plan)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            )
     async def update_workout_plan(
         self, workout_plan_id: int, data: UpdateWorkoutPlan
     ) -> BasicResponse[None]:

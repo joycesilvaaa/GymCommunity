@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from pydantic import BaseModel, field_validator
 from datetime import datetime
+
+from pydantic import BaseModel, field_validator
+
 
 class Options(BaseModel):
     name: str
@@ -16,7 +18,7 @@ class CreateShoppingList(BaseModel):
     @field_validator("*", mode="before")
     @classmethod
     def remove_none(cls, value):
-        return value if value is not None else None 
+        return value if value is not None else None
 
 
 class ListShoppingPreviouns(BaseModel):

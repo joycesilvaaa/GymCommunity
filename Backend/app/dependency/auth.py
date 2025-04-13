@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.settings import Settings
 from app.dependency.database import SessionConnection
-from app.schemas.user import UserResponse
+from app.schemas.user import UserInfo
 from app.service.user import UserService
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -19,7 +19,7 @@ class AuthManager:
     async def has_authorization(
         session: AsyncSession = Depends(SessionConnection.session),
         token: str = Depends(oauth_schema),
-    ) -> UserResponse:
+    ) -> UserInfo:
         setting = Settings()  # type: ignore[call-arg]
         try:
             payoad = decode(

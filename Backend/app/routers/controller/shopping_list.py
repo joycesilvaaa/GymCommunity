@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
 from app.schemas.shopping_list import CreateShoppingList
-from app.schemas.user import UserResponse
+from app.schemas.user import UserInfo
 from app.service.shopping_list import (
     CreateShoppingList,
     ListShoppingPreviouns,
@@ -14,7 +14,7 @@ from app.service.shopping_list import (
 
 
 class ShoppingListController:
-    def __init__(self, session: AsyncSession, user: UserResponse) -> None:
+    def __init__(self, session: AsyncSession, user: UserInfo) -> None:
         self._session = session
         self._service = ShoppingListService(session, user)
 

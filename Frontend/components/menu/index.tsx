@@ -2,10 +2,9 @@ import React from 'react';
 import { Box, Text, Center, HStack, Pressable, Icon } from 'native-base';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
-type MenuProps = {
-  navigation: NavigationProp<any>;
-};
-export function MenuFooter({ navigation }: MenuProps) {
+import { NavigationProps } from '@/interfaces/navigation';
+
+export function MenuFooter({ navigation }:NavigationProps) {
   const [selected, setSelected] = React.useState(1);
 
   return (

@@ -7,18 +7,17 @@ from app.dependency.database import SessionConnection
 from app.modules.basic_response import BasicResponse
 from app.routers.controller.diets import DietController
 from app.schemas.diet import (
+    AllExpiredDiets,
     AllFreeDietQuantity,
+    AllFreeDiets,
     CreateDiet,
     DietData,
-    ExpiringDiets,
+    DietsByProfissional,
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
-    DietsByProfissional,
-    AllFreeDiets,
-    AllExpiredDiets,
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import UserInfo
 
 router_diets = APIRouter(tags=["diets"], prefix="/diets")
 
@@ -26,7 +25,7 @@ router_diets = APIRouter(tags=["diets"], prefix="/diets")
 @router_diets.post("/")
 async def create_diet(
     diet: CreateDiet,
-    user: UserResponse = Depends(AuthManager.has_authorization),
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[None]:
     return await DietController(session).create_diet(diet, user)
@@ -34,7 +33,7 @@ async def create_diet(
 
 @router_diets.get("/last-finished")
 async def get_last_finished_diet(
-    user: UserResponse = Depends(AuthManager.has_authorization),
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[LastFinishedDiet]]:
     return await DietController(session).get_name_last_diet(user)
@@ -42,7 +41,7 @@ async def get_last_finished_diet(
 
 @router_diets.get("/expiring")
 async def get_all_expiring_diets(
-    user: UserResponse = Depends(AuthManager.has_authorization),
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[AllExpiredDiets]]:
     return await DietController(session).get_all_expiring_diets(user)
@@ -50,7 +49,7 @@ async def get_all_expiring_diets(
 
 @router_diets.get("/all-finished")
 async def get_all_finished_diets(
-    user: UserResponse = Depends(AuthManager.has_authorization),
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[DietData]]:
     return await DietController(session).get_all_finished_diets(user)
@@ -78,18 +77,21 @@ async def get_actual_previous_diet(
 ) -> BasicResponse[list[ListDietActual]]:
     return await DietController(session).get_diet_actual_previous(user_id)
 
+
 @router_diets.get("/by-profissional")
 async def get_diets_by_profissional(
-    user: UserResponse = Depends(AuthManager.has_authorization),
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[DietsByProfissional]]:
     return await DietController(session).get_diets_by_profissional(user)
+
 
 @router_diets.get("/all-free")
 async def get_all_free_diets(
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[AllFreeDiets]]:
     return await DietController(session).get_all_free_diets()
+
 
 @router_diets.put("/{diet_id}")
 async def update_diet(

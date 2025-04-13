@@ -5,8 +5,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
 import routes from '@/api/api';
 import { CreateDiet, Meal, OptionType } from '@/interfaces/diet';
+import { NavigationProps } from '@/interfaces/navigation';
 
-export default function CreateDietScreen({ navigation }: any) {
+export default function CreateDietScreen({ navigation }: NavigationProps) {
   const { colors } = useTheme();
   const [nameDiet, setNameDiet] = useState('');
   const [dietDate, setDietDate] = useState('');
@@ -214,16 +215,6 @@ export default function CreateDietScreen({ navigation }: any) {
             ></Button>
           </HStack>
 
-          {meals.length === 0 && (
-            <VStack alignItems="center" p={4} space={2}>
-              <MaterialIcons name="no-meals" size={40} color={colors.coolGray[300]} />
-              <Text color="coolGray.400" textAlign="center">
-                Comece adicionando sua primeira refeição{'\n'}
-                usando o formulário acima
-              </Text>
-            </VStack>
-          )}
-
           {meals.map((meal, index) => (
             <VStack key={index} space={2} bg="white" p={3} borderRadius="md" shadow={1}>
               <HStack alignItems="center" space={2}>
@@ -274,9 +265,7 @@ export default function CreateDietScreen({ navigation }: any) {
                       onPress={handleAddOption}
                       borderRadius="md"
                       leftIcon={<MaterialIcons name="add-circle" size={16} color="white" />}
-                    >
-                      Add
-                    </Button>
+                    ></Button>
                   </HStack>
 
                   <HStack space={2} justifyContent="center">
@@ -294,11 +283,7 @@ export default function CreateDietScreen({ navigation }: any) {
                       </Button>
                     ))}
                   </HStack>
-                </VStack>
-              )}
 
-              {meal.options.length > 0 && (
-                <VStack space={2} mt={2}>
                   {meal.options.map((option, idx) => (
                     <HStack
                       key={idx}
@@ -327,6 +312,15 @@ export default function CreateDietScreen({ navigation }: any) {
               )}
             </VStack>
           ))}
+          {meals.length === 0 && (
+            <VStack alignItems="center" p={4} space={2}>
+              <MaterialIcons name="no-meals" size={40} color={colors.coolGray[300]} />
+              <Text color="coolGray.400" textAlign="center">
+                Comece adicionando sua primeira refeição{'\n'}
+                usando o formulário acima
+              </Text>
+            </VStack>
+          )}
         </VStack>
       </VStack>
     </Layout>

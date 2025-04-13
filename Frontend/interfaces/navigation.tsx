@@ -1,6 +1,6 @@
 import { NavigationProp as ReactNavigationProp } from '@react-navigation/native';
 
-export interface CustomNavigationProp {
+export interface NavigationProps {
   navigation: ReactNavigationProp<any>;
   route?: any;
 }

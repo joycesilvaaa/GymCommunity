@@ -2,23 +2,24 @@ import React from 'react';
 import { Box, VStack, HStack, Text, Pressable, Icon, Badge, Circle } from 'native-base';
 import { NavigationProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-interface ExpiringDietCardProps {
-  title: string; 
-  description: string; 
+
+interface ExpiringWorkoutCardProps {
+  title: string;
+  description: string;
   navigation: NavigationProp<any>;
-  dietId: string; 
-  iconName: keyof typeof MaterialIcons.glyphMap; 
+  workoutId: string;
+  iconName: keyof typeof MaterialIcons.glyphMap;
   userId: string;
 }
 
-export function ExpiringDietCard({ 
-  title, 
-  description, 
-  navigation, 
-  dietId, 
-  iconName, 
-  userId 
-}: ExpiringDietCardProps) {
+export function ExpiringWorkoutCard({
+  title,
+  description,
+  navigation,
+  workoutId,
+  iconName,
+  userId
+}: ExpiringWorkoutCardProps) {
   return (
     <Box 
       p={4} 
@@ -88,7 +89,7 @@ export function ExpiringDietCard({
           _dark={{ borderTopColor: "dark.300" }}
         >
           <Pressable 
-            onPress={() => navigation.navigate("ViewDiet", { id: dietId })}
+            onPress={() => navigation.navigate("ViewWorkout", { id: workoutId })}
             flexDirection="row"
             alignItems="center"
             _pressed={{ opacity: 0.6 }}
@@ -106,7 +107,7 @@ export function ExpiringDietCard({
               color="blue.500"
               _dark={{ color: "blue.400" }}
             >
-              Ver Dieta
+              Ver Treino
             </Text>
           </Pressable>
 
@@ -137,3 +138,4 @@ export function ExpiringDietCard({
     </Box>
   );
 }
+export default ExpiringWorkoutCard;

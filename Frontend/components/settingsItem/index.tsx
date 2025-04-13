@@ -22,7 +22,7 @@ export function SettingsItem({
 }: SettingsItemProps) {
   return (
     <>
-      <Button 
+      <Button
         variant="unstyled"
         justifyContent="space-between"
         alignItems="center"
@@ -39,13 +39,7 @@ export function SettingsItem({
             </Text>
           </Box>
           <Box flexDirection="row" alignItems="center">
-            {hasSwitch && (
-                <Switch
-                    size="sm"
-                    onTrackColor="indigo.600"
-                />
-                )}
-
+            {hasSwitch && <Switch size="sm" onTrackColor="indigo.600" />}
           </Box>
         </Box>
       </Button>

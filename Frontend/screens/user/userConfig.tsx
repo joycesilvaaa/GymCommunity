@@ -4,16 +4,19 @@ import { Box, Text, Avatar, Icon } from 'native-base';
 import { MaterialIcons, AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
 import { SettingsItem } from '@/components/settingsItem';
-import { CustomNavigationProp } from '@/interfaces/navigation';
+import { NavigationProps } from '@/interfaces/navigation';
 import { useState } from 'react';
 import { User } from '@/interfaces/user';
 import { useAuth } from '@/hooks/auth';
 
 
-export function UserConfig({ navigation }: CustomNavigationProp) {
+export function UserConfig({ navigation }: NavigationProps) {
     const context = useAuth();
     const user = context.user ?? { name: 'Guest', email: 'guest@example.com' };
     
+    function handleLogout() {
+        context.logout()    
+    }
 
     
     return (
@@ -64,7 +67,7 @@ export function UserConfig({ navigation }: CustomNavigationProp) {
 
                     <Box bg="white" mt={4} borderRadius="lg" overflow="hidden" shadow={1}>
                         <SettingsItem icon={<Icon as={MaterialIcons} name="delete-outline" color="red.600" />} text="Excluir Conta" onPress={() => console.log('Excluir Conta')} isDestructive />
-                        <SettingsItem icon={<Icon as={AntDesign} name="logout" color="red.600" />} text="Sair da Conta" onPress={() => console.log('Sair da Conta')} isDestructive isLast />
+                        <SettingsItem icon={<Icon as={AntDesign} name="logout" color="red.600" />} text="Sair da Conta" onPress={handleLogout} isDestructive isLast />
                     </Box>
 
                     <Box alignItems="center" mt={8} pb={8}>

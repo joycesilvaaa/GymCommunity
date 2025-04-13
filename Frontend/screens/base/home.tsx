@@ -1,24 +1,15 @@
-import { PostComponent } from '@/components/card/post';
-import { MenuFooter } from '@/components/menu';
-import { View } from 'native-base';
-import { NavigationProp } from '@react-navigation/native';
+import { Box } from 'native-base';
 import { Layout } from '@/components/layout';
-import { Text } from 'react-native';
-import { ScrollView } from 'react-native';
 import { RetanguleCard } from '@/components/card/customRetanguleCard';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/auth';
 import  routes  from '@/api/api';
 import { dietActualPrevious } from '@/interfaces/diet';
 import { WorkoutActualPrevious } from '@/interfaces/workout_plans';
-type HomeProps = {
-  navigation: NavigationProp<any>;
-};
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { NavigationProps } from '@/interfaces/navigation';
+import { useEffect, useState } from 'react';
 
-export function Home({ navigation }: HomeProps) {
+export function Home({ navigation }: NavigationProps) {
   const { user } = useAuth() as { user?: { id: number; user_profile: number } };
   const [userType, setUserType] = useState<number>(user && user.user_profile ? user.user_profile : 1);
   const [quantityFreeDiets, setQuantityFreeDiets] = useState<number>(0);
@@ -50,13 +41,13 @@ export function Home({ navigation }: HomeProps) {
     setQuantityFreeDiets(response.data.data.quantity);
   }
   async function getActualDietPrevius() {
-    if (!user?.id) return navigation.navigate('initial');
+    if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.actualDietPrevious(user.id);
     console.log(response.data.data);
     setActualDietPrevius(response.data.data.length > 0 ? response.data.data[0] : null);
   }
   async function getActualWorkoutPrevius() {
-    if (!user?.id) return navigation.navigate('initial');
+    if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.actualWorkoutPrevious(user.id);
     console.log(response.data.data);
     setActualWorkoutPrevius(response.data.data.length > 0 ? response.data.data[0] : null);
@@ -67,14 +58,14 @@ export function Home({ navigation }: HomeProps) {
     setQuantityFreeWorkout(response.data.data.quantity);
   }
   async function getExpiringDiet() {
-    if (!user?.id) return navigation.navigate('initial');
+    if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.expiringDiet();
     console.log(response.data.data);
     setExpiringDiet(response.data.data.length);
   }
   async function getExpiringWorkout() {
-    if (!user?.id) return navigation.navigate('initial');
-    const response = await routes.expiringWorkput(user.id);
+    if (!user?.id) return navigation.navigate('Initial');
+    const response = await routes.expiringWorkouts();
     console.log(response.data.data);
     setExpiringWorkout(response.data.data.length);
   }
@@ -133,7 +124,7 @@ export function Home({ navigation }: HomeProps) {
     },
     {
       type: 'Adicionar Dieta Gratuita',
-      description: 'Visualize as dietas adicionadas por mim gratuitas',
+      description: 'Visualize as dietas adicionadas por mim gratuitas e adicione novas!',
       icon: <MaterialIcons name="note-add" />,
       screen: 'ManagerMyFreeDiets',
     },
@@ -150,7 +141,7 @@ export function Home({ navigation }: HomeProps) {
       type: 'Treinos a Vencer',
       description: `Quantidade de treinos: ${expiringWorkout}`,
       icon: <MaterialIcons name="fitness-center" />,
-      screen: expiringWorkout > 0 ? 'ExpiringWorkout' : 'Home',
+      screen: "ExpiringWorkout",
     },
     {
       type: 'Treinos Gratuitos',
@@ -162,13 +153,14 @@ export function Home({ navigation }: HomeProps) {
       type: 'Adicionar Treino Gratuito',
       description: 'Adicione um treino gratuito para a comunidade',
       icon: <MaterialIcons name="add" />,
-      screen: "CreateWorkout",
+      screen: 'ManagerMyFreeTraining',
     },
   ];
 
   return (
     <Layout navigation={navigation}>
-      <View flex={1} margin={2} padding={1}>
+      <Box  flex={1} bg="gray.50" p={4}  >
+        
         {(userType === 1) &&
           cardData.map((card, index) => (
             <RetanguleCard
@@ -202,7 +194,7 @@ export function Home({ navigation }: HomeProps) {
               navigation={navigation}
             />
           ))}
-      </View>
+      </Box>
     </Layout>
   );
 }

@@ -9,6 +9,7 @@ class Option(BaseModel):
     quantity: int
     type: str
 
+
 class Menu(BaseModel):
     title: str
     options: list[Option] = []
@@ -48,15 +49,18 @@ class ExpiringDiets(BaseModel):
     user_id: int
     days_remaining: int
 
+
 class AllFreeDiets(BaseModel):
     id: int
     title: str
     description: str
 
+
 class DietsByProfissional(BaseModel):
     id: int
     title: str
     description: str
+
 
 class UpdateDiet(BaseModel):
     title: str
@@ -71,6 +75,7 @@ class LastFinishedDiet(BaseModel):
     id: int
     title: str
     end_date: datetime
+
 
 class AllExpiredDiets(BaseModel):
     id: int

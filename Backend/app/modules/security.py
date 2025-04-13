@@ -6,7 +6,7 @@ import jwt
 from pwdlib import PasswordHash
 
 from app.config.settings import Settings
-from app.schemas.user import UserInfoLogger
+from app.schemas.user import UserInfo
 
 
 class PasswordManager:
@@ -29,7 +29,7 @@ class TokenManager:
             self.__settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    def create_access_token(self, data: UserInfoLogger) -> str:
+    def create_access_token(self, data: UserInfo) -> str:
         expire = datetime.now().astimezone() + timedelta(
             minutes=self.__access_token_expire_minutes
         )

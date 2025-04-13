@@ -4,16 +4,15 @@ from sqlalchemy.sql import bindparam, delete, text, update
 
 from app.core.db_model import Diets
 from app.schemas.diet import (
+    AllExpiredDiets,
     AllFreeDietQuantity,
+    AllFreeDiets,
     CreateDiet,
     DietData,
-    ExpiringDiets,
+    DietsByProfissional,
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
-    DietsByProfissional,
-    AllFreeDiets,
-    AllExpiredDiets,
 )
 
 
@@ -176,7 +175,9 @@ class DietService:
         await self._session.execute(delete(Diets).where(Diets.id == diet_id))
         await self._session.commit()
 
-    async def get_diets_by_professional(self, user_id: int) -> list[DietsByProfissional]:
+    async def get_diets_by_professional(
+        self, user_id: int
+    ) -> list[DietsByProfissional]:
         query = text("""
             select
                 d.id,
@@ -191,7 +192,7 @@ class DietService:
         result = await self._session.execute(query)
         diets = result.fetchall()
         return [DietsByProfissional(**diet._asdict()) for diet in diets]
-    
+
     async def get_all_free_diets(self) -> list[AllFreeDiets]:
         query = text("""
             select

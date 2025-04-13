@@ -21,9 +21,12 @@ interface LayoutProps {
             <Icon size="8" color="indigo.600" as={<MaterialIcons name="fitness-center" />} />
             <Icon size="8" color="indigo.600" as={<MaterialIcons name="message" />} />
           </Box>    
-          <ScrollView>
-            {children}
+          
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                    {children}
+ 
           </ScrollView>
+          
           <MenuFooter navigation={navigation} />
         </Box>
       </>

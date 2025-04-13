@@ -10,7 +10,7 @@ import { IShoppingListPrevious } from '@/interfaces/shoppingList';
 import routes from '@/api/api';
 import { useAuth } from '@/hooks/auth';
 import { AuthContext } from '@/context/auth';
-import { formatarDataBrasil } from '@/utils';
+import { formatedDateBr } from '@/utils';
 interface MenuProps {
   navigation: NavigationProp<any>;
 }
@@ -50,7 +50,7 @@ export function ListShopping({ navigation}: MenuProps) {
                            <ItemCard
                                key={index}
                                title={item.title}
-                               description={`Data de atualização: ${formatarDataBrasil(item.last_update)}`}
+                               description={`Data de atualização: ${formatedDateBr(item.last_update)}`}
                                navigation={navigation}
                                screen="ViewShoppingList"
                                id={item.id.toString()}

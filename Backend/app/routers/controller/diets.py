@@ -4,18 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
 from app.schemas.diet import (
+    AllExpiredDiets,
     AllFreeDietQuantity,
+    AllFreeDiets,
     CreateDiet,
     DietData,
-    ExpiringDiets,
+    DietsByProfissional,
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
-    DietsByProfissional,
-    AllFreeDiets,
-    AllExpiredDiets
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import UserInfo
 from app.service.diets import DietService
 
 
@@ -64,7 +63,7 @@ class DietController:
             raise e
 
     async def get_all_expiring_diets(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[AllExpiredDiets]]:
         try:
             expiring_diets = await self._service.get_all_expiring_diets(user.id)
@@ -75,7 +74,7 @@ class DietController:
             raise e
 
     async def get_all_finished_diets(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[DietData]]:
         try:
             finished_diets = await self._service.get_all_finished_diets(user.id)
@@ -86,7 +85,7 @@ class DietController:
             raise e
 
     async def get_name_last_diet(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[LastFinishedDiet]]:
         try:
             last_finished_diet = await self._service.get_name_last_diet(user.id)
@@ -97,7 +96,7 @@ class DietController:
             raise e
 
     async def create_diet(
-        self, diet: CreateDiet, user: UserResponse
+        self, diet: CreateDiet, user: UserInfo
     ) -> BasicResponse[None]:
         try:
             await self._service.create_diet(diet, user.id)
@@ -128,7 +127,7 @@ class DietController:
             raise e
 
     async def get_diets_by_profissional(
-        self, user: UserResponse
+        self, user: UserInfo
     ) -> BasicResponse[list[DietsByProfissional]]:
         try:
             diets = await self._service.get_diets_by_professional(user.id)
@@ -137,7 +136,7 @@ class DietController:
             raise e
         except Exception as e:
             raise e
-        
+
     async def get_all_free_diets(self) -> BasicResponse[list[AllFreeDiets]]:
         try:
             diets = await self._service.get_all_free_diets()

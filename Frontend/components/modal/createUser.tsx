@@ -18,7 +18,7 @@ import { UserProfile } from '@/enum';
 import { ICreateUser } from '@/interfaces/user';
 import routes from '@/api/api';
 import { LogBox } from 'react-native';
-import {  validarCPF } from '@/utils';
+import {  validateCpf } from '@/utils';
 import { useAuth } from '@/hooks/auth';
 import { navigate } from 'expo-router/build/global-state/routing';
 
@@ -110,7 +110,7 @@ function validation(): boolean {
         Alert.alert('Erro', 'O CPF deve ter 11 dígitos.');
         return false;
     }
-    if (!validarCPF(cpf)) {
+    if (!validateCpf(cpf)) {
         Alert.alert('Erro', 'O CPF informado é inválido.');
         return false;
     }

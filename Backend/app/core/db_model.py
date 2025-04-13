@@ -67,7 +67,7 @@ class WorkoutPlans(Base):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String)
     description: Mapped[str] = mapped_column(String)
-    plan: Mapped[JSON] = mapped_column(JSON, server_default=text("'{}'::jsonb"))
+    plans: Mapped[JSON] = mapped_column(JSON, server_default=text("'[]'::jsonb"))
     user_id: Mapped[int] = mapped_column(
         BIGINT, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
@@ -81,6 +81,11 @@ class WorkoutPlans(Base):
         Integer,
         server_default=text("5"),
         comment="Number of days per week the plan is valid",
+    )
+    type: Mapped[str] = mapped_column(
+        String,
+        server_default=text("'Musculação'"),
+        comment="Type of workout plan",
     )
     create_date: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
@@ -159,6 +164,9 @@ class UserTraining(Base):
     )
     progress: Mapped[float] = mapped_column(
         Float, server_default=text("0.0"), comment="User progress in percentage"
+    )
+    is_completed: Mapped[bool] = mapped_column(
+        Boolean, server_default=text("false"), comment="Is the training completed?"
     )
     end_date: Mapped[datetime] = mapped_column(DateTime)
     last_update: Mapped[datetime] = mapped_column(

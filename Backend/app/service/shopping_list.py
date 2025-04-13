@@ -1,23 +1,28 @@
 # -*- coding: utf-8 -*-
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text
-from fastapi import HTTPException
+
 from app.core.db_model import ShoppingList
 from app.schemas.shopping_list import (
     CreateShoppingList,
     ListShoppingPreviouns,
     ShoppingListData,
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import  UserInfo
 
 
 class ShoppingListService:
-    def __init__(self, session: AsyncSession, user: UserResponse) -> None:
+    def __init__(self, session: AsyncSession, user: UserInfo) -> None:
         self._session = session
         self._user = user
 
     async def create_shopping_list(self, form_data: CreateShoppingList) -> None:
-        data_created = {key: value for key, value in form_data.model_dump().items() if value is not None}
+        data_created = {
+            key: value
+            for key, value in form_data.model_dump().items()
+            if value is not None
+        }
         print(data_created)
         shopping_list = ShoppingList(**data_created)
         shopping_list.user_id = self._user.id
@@ -108,7 +113,5 @@ class ShoppingListService:
 
         shopping_list = result.fetchone()
         if not shopping_list:
-            raise HTTPException(
-                status_code=404, detail="Shopping list not found"
-            )
+            raise HTTPException(status_code=404, detail="Shopping list not found")
         return ShoppingListData(**shopping_list._asdict())

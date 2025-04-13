@@ -4,11 +4,11 @@ import { NavigationProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface RetanguleCardProps {
-  type: string; // Tipo do card
-  description: string; // Descrição dinâmica
-  screen: string; // Tela para navegar
+  type: string; 
+  description: string; 
+  screen: string; 
   navigation: NavigationProp<any>;
-  icon: JSX.Element; // Ícone passado como componente React
+  icon: JSX.Element;
   route?: any;
 }
 
@@ -19,7 +19,7 @@ export function RetanguleCard({ type, description, navigation, icon, screen, rou
   };
 
   return (
-    <Box p={4} bg="gray.50" mb={4} shadow={2} borderRadius={10}>
+    <Box p={4} bg="white" mb={4} shadow={1} borderRadius={10} overflow="hidden" >
       <Pressable onPress={handlePress}>
         <VStack space={3}>
           <HStack alignItems="center" justifyContent="space-between">

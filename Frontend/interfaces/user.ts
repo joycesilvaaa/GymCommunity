@@ -21,6 +21,7 @@ export interface User {
     name: string;
     email: string;
     user_profile: number
+    created_at: Date;
 }
 export interface IUserDetails {
     user_id: number

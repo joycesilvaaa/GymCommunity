@@ -11,6 +11,7 @@ from app.schemas.workout_plans import (
     ListWorkoutPlanActual,
     UpdateWorkoutPlan,
     WorkoutPlanData,
+    PreviousWorkoutPlan
 )
 
 
@@ -110,18 +111,21 @@ class WorkoutPlanService:
                 wp.id,
                 wp.title,
                 ut.user_id,
-                extract(day from ut.end_date - now()) as days_remaining
+                wp.id as workout_id
             from workout_plans wp
             join user_trainings ut
                 on ut.workout_plan_id = wp.id
-            where ut.user_id = :id
-            and ut.end_date > now()
-            order by days_remaining
+            join user_relations ur
+                on ur.user_id = ut.user_id
+            where wp.user_id = ur.professional_id
+            and ut.is_completed = false
+            and ut.end_date::DATE BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
+            and ur.professional_id = :id
         """).bindparams(bindparam("id", user_id))
         result = await self._session.execute(query)
         workout_plans = result.fetchall()
         return [
-            ExpiringWorkoutPlans(**dict(workout_plan))
+            ExpiringWorkoutPlans(**workout_plan._asdict())
             for workout_plan in workout_plans
         ]
 
@@ -168,6 +172,39 @@ class WorkoutPlanService:
         workout_plans = result.fetchall()
         return [
             WorkoutPlanData(**dict(workout_plan)) for workout_plan in workout_plans
+        ]
+
+    async def get_all_free_workout_plans(self) -> list[PreviousWorkoutPlan]:
+        query = text("""
+            select
+                wp.id,
+                wp.title,
+                wp.description,
+                u."name" as professional_name
+            from workout_plans wp
+            join users u on u.id = wp.user_id
+            where wp.is_public = true
+        """)
+        result = await self._session.execute(query)
+        workout_plans = result.fetchall()
+        return [
+            PreviousWorkoutPlan(**workout_plan._asdict()) for workout_plan in workout_plans
+        ]
+    
+    async def get_workout_plan_by_professional(self, user_id: int) -> list[PreviousWorkoutPlan]:
+        query = text("""
+            select
+                wp.id,
+                wp.title,
+                wp.description
+            from workout_plans wp
+            where wp.user_id = :id
+            and wp.is_public = true
+        """).bindparams(bindparam("id", user_id))
+        result = await self._session.execute(query)
+        workout_plans = result.fetchall()
+        return [
+            PreviousWorkoutPlan(**workout_plan._asdict()) for workout_plan in workout_plans
         ]
 
     async def create_workout_plan(
