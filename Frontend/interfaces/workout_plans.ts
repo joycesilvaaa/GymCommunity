@@ -23,6 +23,8 @@ export interface CreateTraining {
   days_per_week: number;
   type: string;
   months_valid: number;
+  start_date?: string;
+  user_id?: number;
 }
 
 export interface ViewWorkout {

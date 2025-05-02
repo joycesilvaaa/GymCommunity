@@ -9,7 +9,7 @@ from app.schemas.shopping_list import (
     ListShoppingPreviouns,
     ShoppingListData,
 )
-from app.schemas.user import  UserInfo
+from app.schemas.user import UserInfo
 
 
 class ShoppingListService:

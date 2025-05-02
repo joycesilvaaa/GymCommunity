@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Input, Button, Text, VStack, HStack, Switch, useTheme, Center } from 'native-base';
-import { Alert, StatusBar } from 'react-native';
+import { Input, Button, Text, VStack, HStack, Switch, useTheme } from 'native-base';
+import { Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
 import routes from '@/api/api';
 import { CreateDiet, Meal, OptionType } from '@/interfaces/diet';
 import { NavigationProps } from '@/interfaces/navigation';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-export default function CreateDietScreen({ navigation }: NavigationProps) {
+export default function CreateDietScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
   const [nameDiet, setNameDiet] = useState('');
   const [dietDate, setDietDate] = useState('');
@@ -19,6 +20,20 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
   const [description, setDescription] = useState('');
   const [selectedMealIndex, setSelectedMealIndex] = useState<number | null>(null);
   const [isPublic, setIsPublic] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
+  const { id } = route.params || { id: null };
+
+  function onDateChange(event: any, selectedDate?: Date) {
+    const currentDate = selectedDate || startDate;
+    setShowDatePicker(false);
+    setStartDate(currentDate);
+  }
+
+  function showDatePickerDialog() {
+    setShowDatePicker(true);
+  }
 
   function handleRemoveOption(mealIndex: number, optionName: string) {
     setMeals((prevMeals) =>
@@ -35,7 +50,7 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
       Alert.alert('Erro', 'O tipo da refeição é obrigatório.');
       return;
     }
-    setMeals((prevMeals) => [...prevMeals, { title: mealType, options: [] }]);
+    setMeals((prevMeals) => [...prevMeals, { title: mealType, options: [], time_to_eat: '' }]);
     setMealType('');
   }
 
@@ -71,7 +86,7 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
     if (selectedMealIndex === index) setSelectedMealIndex(null);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (meals.length < 4 || !dietDate.trim()) {
       Alert.alert('Erro', 'Adicione um período e pelo menos 4 refeições.');
       return;
@@ -82,12 +97,18 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
       Alert.alert('Erro', 'O período deve ser um número positivo.');
       return;
     }
+    if (lastScreen === 'UserProfile' && (!startDate || (startDate ?? new Date()) < new Date())) {
+      3;
+      Alert.alert('Erro', 'A data de início é obrigatória e deve ser futura ou igual a hoje.');
+      return;
+    }
 
     const newDiet: CreateDiet = {
       title: nameDiet,
       description,
       menu: meals.map((meal) => ({
         title: meal.title,
+        time_to_eat: meal.time_to_eat,
         options: meal.options.map((option) => ({
           name: option.name,
           quantity: option.quantity,
@@ -98,8 +119,18 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
       months_valid: monthsValid,
     };
 
-    routes.createDiet(newDiet);
-    console.log('Dieta criada:', newDiet);
+    if (lastScreen === 'UserProfile') {
+      newDiet.start_date = startDate
+        ? startDate.toISOString().replace('Z', '')
+        : new Date().toISOString().replace('Z', '');
+      newDiet.user_id = id;
+    }
+
+    const response = await routes.createDiet(newDiet);
+    if (response.status !== 200) {
+      Alert.alert('Erro', 'Erro ao criar dieta. Tente novamente mais tarde.');
+      return;
+    }
     Alert.alert('Sucesso', 'Dieta criada com sucesso!');
     navigation.goBack();
   }
@@ -150,6 +181,28 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
             multiline
             numberOfLines={3}
           />
+          {lastScreen === 'UserProfile' && (
+            <>
+              <Input
+                placeholder="Data de Início"
+                variant="filled"
+                bg="coolGray.100"
+                borderRadius="md"
+                fontSize="sm"
+                value={startDate ? startDate.toLocaleDateString() : ''}
+                onFocus={showDatePickerDialog}
+              />
+              {showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={startDate || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={onDateChange}
+                />
+              )}
+            </>
+          )}
         </VStack>
 
         <VStack space={4}>
@@ -175,7 +228,8 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
               <Switch
                 size="sm"
                 onTrackColor="indigo.400"
-                isChecked={isPublic}
+                isChecked={lastScreen === 'UserProfile' ? false : isPublic}
+                isDisabled={lastScreen === 'UserProfile'}
                 onToggle={setIsPublic}
               />
             </HStack>
@@ -217,24 +271,63 @@ export default function CreateDietScreen({ navigation }: NavigationProps) {
 
           {meals.map((meal, index) => (
             <VStack key={index} space={2} bg="white" p={3} borderRadius="md" shadow={1}>
-              <HStack alignItems="center" space={2}>
+              <HStack space={3} alignItems="center">
                 <Button
                   flex={1}
                   variant="ghost"
                   bg={selectedMealIndex === index ? 'indigo.50' : 'coolGray.50'}
-                  borderWidth={1}
-                  borderColor="coolGray.200"
-                  borderRadius="md"
-                  _text={{ color: 'coolGray.700', fontWeight: 'medium' }}
+                  borderWidth={1.5}
+                  borderColor={selectedMealIndex === index ? 'indigo.200' : 'coolGray.200'}
+                  borderRadius="lg"
+                  _pressed={{ bg: 'indigo.100' }}
+                  _text={{
+                    color: selectedMealIndex === index ? 'indigo.700' : 'coolGray.700',
+                    fontWeight: 'semibold',
+                    fontSize: 'sm',
+                  }}
                   onPress={() => setSelectedMealIndex(index)}
                   leftIcon={
-                    <MaterialIcons name="restaurant" size={14} color={colors.indigo[600]} />
+                    <MaterialIcons
+                      name="restaurant"
+                      size={16}
+                      color={
+                        selectedMealIndex === index ? colors.indigo[600] : colors.coolGray[500]
+                      }
+                    />
                   }
+                  px={4}
+                  height={10}
                 >
                   {meal.title || 'Nova Refeição'}
                 </Button>
-                <Button variant="ghost" p={2} onPress={() => handleRemoveMeal(index)}>
-                  <MaterialIcons name="delete" size={18} color={colors.red[600]} />
+
+                <Input
+                  placeholder="HH:mm"
+                  value={meal.time_to_eat}
+                  onChangeText={(time) =>
+                    setMeals((prevMeals) =>
+                      prevMeals.map((m, i) => (i === index ? { ...m, time_to_eat: time } : m)),
+                    )
+                  }
+                  width="25%"
+                  height={10}
+                  textAlign="center"
+                  fontSize="md"
+                  borderColor="coolGray.200"
+                  borderRadius="lg"
+                  bg="coolGray.50"
+                  keyboardType="numeric"
+                  maxLength={5}
+                />
+
+                <Button
+                  variant="ghost"
+                  p={2}
+                  _pressed={{ bg: 'red.50' }}
+                  onPress={() => handleRemoveMeal(index)}
+                  borderRadius="full"
+                >
+                  <MaterialIcons name="delete-outline" size={20} color={colors.red[500]} />
                 </Button>
               </HStack>
 

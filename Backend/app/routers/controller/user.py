@@ -7,6 +7,7 @@ from app.schemas.user import UserInfo
 from app.service.user import (
     ClientInfo,
     CreateUser,
+    RankingPoints,
     UpdateUser,
     UserDetail,
     UserService,
@@ -18,7 +19,6 @@ class UserController:
         self._session = session
         self._service = UserService(session)
         self._user = user
-
 
     async def get_user_by_id(self) -> BasicResponse[UserInfo]:
         try:
@@ -49,7 +49,7 @@ class UserController:
         except Exception as e:
             raise e
 
-    async def get_user_detail_by_cpf(self, cpf: str) -> BasicResponse[UserDetail]:
+    async def get_user_detail_by_cpf(self, cpf: str) -> BasicResponse[UserInfo]:
         try:
             user_detail = await self._service.get_user_by_cpf(cpf=cpf)
             return BasicResponse(data=user_detail)
@@ -62,13 +62,15 @@ class UserController:
         self, user_id: int
     ) -> BasicResponse[None]:
         try:
-            await self._service.associate_professional_with_client(user_id, self._user.id)
+            await self._service.associate_professional_with_client(
+                user_id, self._user.id
+            )
             return BasicResponse(data=None)
         except HTTPException as e:
             raise e
         except Exception as e:
             raise e
-    
+
     async def create_user(self, form_user: CreateUser) -> BasicResponse[None]:
         try:
             await self._service.create_user(form_user)
@@ -77,16 +79,16 @@ class UserController:
             raise e
         except Exception as e:
             raise e
-    
-    async def update_user(self) -> BasicResponse[None]:
+
+    async def update_user(self, form_data: UpdateUser) -> BasicResponse[None]:
         try:
-            await self._service.update_user(self._user.id, UpdateUser)
+            await self._service.update_user(self._user.id, form_data)
             return BasicResponse(data=None)
         except HTTPException as e:
             raise e
         except Exception as e:
             raise e
-        
+
     async def delete_relation(self, user_id: int) -> BasicResponse[None]:
         try:
             await self._service.delete_relation(user_id, self._user.id)
@@ -100,6 +102,15 @@ class UserController:
         try:
             await self._service.disable_user(self._user.id)
             return BasicResponse(data=None)
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise e
+
+    async def get_ranking_points(self) -> BasicResponse[RankingPoints]:
+        try:
+            ranking_points = await self._service.get_ranking_points(self._user.id)
+            return BasicResponse(data=ranking_points)
         except HTTPException as e:
             raise e
         except Exception as e:

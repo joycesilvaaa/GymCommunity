@@ -17,11 +17,16 @@ class Plan(BaseModel):
 
 class WorkoutPlanData(BaseModel):
     id: int
-    plan: Plan
+    plans: list[Plan] = []
     title: str
     description: str
     start_date: datetime
     end_date: datetime
+    time_to_workout: str
+    daily_training: int
+    completed_days: int
+    last_update: datetime
+    type: str
 
 
 class ListWorkoutPlanActual(BaseModel):
@@ -37,7 +42,10 @@ class CreateWorkoutPlan(BaseModel):
     is_public: bool | None = False
     months_valid: int
     days_per_week: int
-    type: str 
+    type: str
+    time_to_workout: str | None = None
+    user_id: int | None = None
+    start_date: datetime | None = None
 
 
 class AllFreeWorkoutPlanQuantity(BaseModel):
@@ -64,6 +72,7 @@ class LastFinishedWorkoutPlan(BaseModel):
     id: int
     title: str
     end_date: datetime
+
 
 class PreviousWorkoutPlan(BaseModel):
     id: int

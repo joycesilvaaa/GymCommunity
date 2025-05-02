@@ -3,7 +3,6 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
-from app.schemas.shopping_list import CreateShoppingList
 from app.schemas.user import UserInfo
 from app.service.shopping_list import (
     CreateShoppingList,

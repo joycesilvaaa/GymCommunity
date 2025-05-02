@@ -32,7 +32,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
     user_profile: Mapped[int] = mapped_column(Integer)
-    images = mapped_column(JSON, server_default=text("'[]'::jsonb"))
+    image_profile: Mapped[str | None] = mapped_column(String, nullable=True)
     birth_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     last_update: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
@@ -58,6 +58,9 @@ class Diets(Base):
     )
     last_update: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
+    )
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean, server_default=text("false"), comment="Is the plan deleted?"
     )
 
 
@@ -92,6 +95,9 @@ class WorkoutPlans(Base):
     )
     last_update: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
+    )
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean, server_default=text("false"), comment="Is the plan deleted?"
     )
 
 
@@ -157,7 +163,7 @@ class UserTraining(Base):
         DateTime, server_default=func.now(), comment="Start date of the plan"
     )
     daily_training: Mapped[int] = mapped_column(
-        Integer, server_default=text("1"), comment="Daily training"
+        Integer, server_default=text("0"), comment="Daily training"
     )
     completed_days: Mapped[int] = mapped_column(
         Integer, server_default=text("0"), comment="Number of completed days"
@@ -165,8 +171,8 @@ class UserTraining(Base):
     progress: Mapped[float] = mapped_column(
         Float, server_default=text("0.0"), comment="User progress in percentage"
     )
-    is_completed: Mapped[bool] = mapped_column(
-        Boolean, server_default=text("false"), comment="Is the training completed?"
+    time_to_workout: Mapped[str] = mapped_column(
+        String, server_default=text("'00:00'"), comment="Time to workout"
     )
     end_date: Mapped[datetime] = mapped_column(DateTime)
     last_update: Mapped[datetime] = mapped_column(
@@ -229,9 +235,14 @@ class ChatMessage(Base):
     user_id: Mapped[int] = mapped_column(
         BIGINT, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    content: Mapped[str] = mapped_column(String, comment="Content of the message")
-    image_urls: Mapped[list[str]] = mapped_column(
-        JSON, server_default=text("'[]'::jsonb"), comment="List of image URLs"
+    content: Mapped[str | None] = mapped_column(
+        String, comment="Content of the message", nullable=True
+    )
+    image_urls: Mapped[list[str] | None] = mapped_column(
+        JSON,
+        server_default=text("'[]'::jsonb"),
+        comment="List of image URLs",
+        nullable=True,
     )
     send_date: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), comment="Date when the message was sent"
@@ -268,4 +279,38 @@ class UserRelations(Base):
     )
     create_date: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
+    )
+
+
+class HealthGold(Base):
+    __tablename__ = "health_goals"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    goal_type: Mapped[str] = mapped_column(String, comment="Type of goal")
+    start_weight: Mapped[float] = mapped_column(Float, comment="Starting weight")
+    goal_weight: Mapped[float] = mapped_column(Float, comment="Goal weight")
+    end_weight: Mapped[float] = mapped_column(Float, comment="Ending weight")
+    start_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    end_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    success: Mapped[bool] = mapped_column(Boolean, default=False)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    last_update: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+    create_date: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class UserPoints(Base):
+    __tablename__ = "user_points"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+
+    points: Mapped[int] = mapped_column(Integer, default=5, comment="User points")
+    last_update: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
     )

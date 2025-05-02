@@ -19,7 +19,8 @@ interface LayoutProps {
         <Box flex={1} flexDirection="column" backgroundColor="white" >
           <Box flexDirection="row" justifyContent="space-between"  backgroundColor="indigo" padding={2} margin={2}>
             <Icon size="8" color="indigo.600" as={<MaterialIcons name="fitness-center" />} />
-            <Icon size="8" color="indigo.600" as={<MaterialIcons name="message" />} />
+            <Icon size="8" color="indigo.600" as={<MaterialIcons name="message" />} 
+            onPress={() => navigation.navigate("AllChats")}/>
           </Box>    
           
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>

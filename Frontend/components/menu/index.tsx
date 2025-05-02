@@ -1,16 +1,15 @@
 import React from 'react';
-import { Box, Text, Center, HStack, Pressable, Icon } from 'native-base';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { NavigationProp } from '@react-navigation/native';
+import { Box, Center, HStack, Pressable, Icon } from 'native-base';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationProps } from '@/interfaces/navigation';
 
-export function MenuFooter({ navigation }:NavigationProps) {
+export function MenuFooter({ navigation }: NavigationProps) {
   const [selected, setSelected] = React.useState(1);
 
   return (
     <Box justifyContent="flex-end">
       <HStack bg="indigo.600" alignItems="center" safeAreaBottom shadow={6}>
-      <Pressable
+        <Pressable
           opacity={selected === 2 ? 1 : 0.5}
           py="3"
           flex={1}
@@ -47,8 +46,6 @@ export function MenuFooter({ navigation }:NavigationProps) {
             />
           </Center>
         </Pressable>
-
-        
 
         <Pressable
           opacity={selected === 3 ? 1 : 0.5}

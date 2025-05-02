@@ -13,6 +13,7 @@ class Option(BaseModel):
 class Menu(BaseModel):
     title: str
     options: list[Option] = []
+    time_to_eat: str
 
 
 class DietData(BaseModel):
@@ -37,6 +38,8 @@ class CreateDiet(BaseModel):
     menu: list[Menu] = []
     is_public: bool
     months_valid: int
+    user_id: int | None = None
+    start_date: datetime | None = None
 
 
 class AllFreeDietQuantity(BaseModel):

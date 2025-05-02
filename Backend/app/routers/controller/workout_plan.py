@@ -10,9 +10,9 @@ from app.schemas.workout_plans import (
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
     ListWorkoutPlanActual,
+    PreviousWorkoutPlan,
     UpdateWorkoutPlan,
     WorkoutPlanData,
-    PreviousWorkoutPlan
 )
 from app.service.workout_plans import WorkoutPlanService
 
@@ -136,9 +136,8 @@ class WorkoutPlanController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
 
-
     async def get_all_free_workout_plans(
-            self, 
+        self,
     ) -> BasicResponse[list[PreviousWorkoutPlan]]:
         try:
             free_workout_plans = await self._service.get_all_free_workout_plans()
@@ -147,17 +146,20 @@ class WorkoutPlanController:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
-        
+
     async def get_all_free_workout_plan_by_professional(
         self, user: UserInfo
     ) -> BasicResponse[list[PreviousWorkoutPlan]]:
         try:
-            workout_plan = await self._service.get_workout_plan_by_professional(user.id)
+            workout_plan = await self._service.get_workout_plan_by_professional(
+                user.id
+            )
             return BasicResponse(data=workout_plan)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
+
     async def update_workout_plan(
         self, workout_plan_id: int, data: UpdateWorkoutPlan
     ) -> BasicResponse[None]:

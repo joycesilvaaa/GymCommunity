@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependency.auth import AuthManager
@@ -9,6 +9,7 @@ from app.routers.controller.user import UserController
 from app.schemas.user import (
     ClientInfo,
     CreateUser,
+    RankingPoints,
     UpdateUser,
     UserDetail,
     UserInfo,
@@ -19,7 +20,7 @@ router_user = APIRouter(tags=["user"], prefix="/user")
 
 @router_user.put("/")
 async def update_user(
-    data_update: UpdateUser,
+    data_update: UpdateUser = Body(...),
     user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[None]:
@@ -33,13 +34,16 @@ async def create_user(
 ) -> BasicResponse[None]:
     return await UserController(session).create_user(form_user)
 
+
 @router_user.post("/associate-client-professional/{client_id}")
 async def associate_client_professional(
     client_id: int,
     session: AsyncSession = Depends(SessionConnection.session),
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
-    return await UserController(session, user).associate_professional_with_client(client_id)
+    return await UserController(session, user).associate_professional_with_client(
+        client_id
+    )
 
 
 @router_user.delete("/")
@@ -91,3 +95,11 @@ async def delete_relations(
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
     return await UserController(session, user).delete_relation(user_id)
+
+
+@router_user.get("/ranking-points")
+async def get_ranking_points(
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[RankingPoints]:
+    return await UserController(session, user).get_ranking_points()

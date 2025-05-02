@@ -19,9 +19,9 @@ import { Layout } from '@/components/layout';
 import { NavigationProps } from '@/interfaces/navigation';
 import { CreateTraining, TrainingPlan } from '@/interfaces/workout_plans';
 import routes from '@/api/api';
-import { Toast } from 'native-base';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-export default function CreateTrainingScreen({ navigation }: NavigationProps) {
+export default function CreateTrainingScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -36,15 +36,19 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
   const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const toast = useToast();
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
+  const { id } = route.params || { id: null };
 
-  function handleAddPlan(){
+  function handleAddPlan() {
     if (!planTitle.trim()) {
       Alert.alert('Erro', 'O título do plano de treino é obrigatório');
       return;
     }
     setPlans([...plans, { title: planTitle, exercises: [] }]);
     setPlanTitle('');
-  };
+  }
 
   function handleAddExercise() {
     if (!exerciseName.trim() || !repetitions.trim() || !restTime.trim()) {
@@ -65,20 +69,20 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
     setExerciseName('');
     setRepetitions('');
     setRestTime('');
-  };
+  }
 
   function handleRemoveExercise(planIndex: number, exerciseIndex: number) {
     const updatedPlans = [...plans];
     updatedPlans[planIndex].exercises.splice(exerciseIndex, 1);
     setPlans(updatedPlans);
-  };
+  }
 
-  function handleRemovePlan(index: number){
+  function handleRemovePlan(index: number) {
     setPlans(plans.filter((_, i) => i !== index));
     if (selectedPlanIndex === index) setSelectedPlanIndex(null);
-  };
+  }
 
-  async function handleSubmit(){
+  async function handleSubmit() {
     if (plans.length === 0 || plans.some((plan) => plan.exercises.length === 0)) {
       Alert.alert('Erro', 'Adicione pelo menos um plano de treino com exercícios');
       return;
@@ -93,7 +97,15 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
       plans,
       months_valid: Number(monthsValid),
     };
-    try{
+    if (lastScreen === 'UserProfile') {
+      if (!startDate) {
+        Alert.alert('Erro', 'Selecione uma data de início válida');
+        return;
+      }
+      newTraining.user_id = id;
+      newTraining.start_date = startDate.toISOString().split('T')[0];
+    }
+    try {
       const response = await routes.createTraining(newTraining);
       if (response.status !== 200) {
         toast.show({
@@ -103,15 +115,21 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
         });
         return;
       }
-    }catch (error) {
+    } catch (error) {
       console.error('Erro ao criar treino:', error);
       Alert.alert('Erro', 'Não foi possível criar o treino. Tente novamente mais tarde.');
       return;
     }
-    
-    
-  };
+  }
 
+  function onDateChange(event: any, selectedDate?: Date) {
+    const currentDate = selectedDate || startDate;
+    setShowDatePicker(false);
+    setStartDate(currentDate);
+  }
+  function showDatePickerDialog() {
+    setShowDatePicker(true);
+  }
   return (
     <Layout navigation={navigation}>
       <VStack flex={1} p={4} space={4} bg="white">
@@ -129,8 +147,7 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
           </Button>
         </HStack>
 
-        {/* Configurações Básicas */}
-        <VStack space={4}>
+        <VStack space={2}>
           <Text fontSize="lg" fontWeight="semibold" color="coolGray.700">
             Configurações Básicas
           </Text>
@@ -173,12 +190,45 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
               borderRadius="md"
               keyboardType="numeric"
             />
-
-            <HStack alignItems="center" space={2} bg="coolGray.100" px={3} borderRadius="md">
-              <Text color="coolGray.600">Público</Text>
-              <Switch isChecked={isPublic} onToggle={setIsPublic} colorScheme="indigo" />
-            </HStack>
           </HStack>
+
+          <VStack space={2}>
+            {lastScreen === 'UserProfile' && (
+              <>
+                <VStack>
+                  <Input
+                    placeholder="Data de Início"
+                    variant="filled"
+                    bg="coolGray.100"
+                    borderRadius="md"
+                    fontSize="sm"
+                    value={startDate ? startDate.toLocaleDateString() : ''}
+                    onFocus={showDatePickerDialog}
+                  />
+                  {showDatePicker && (
+                    <DateTimePicker
+                      testID="dateTimePicker"
+                      value={startDate || new Date()}
+                      mode="date"
+                      display="default"
+                      onChange={onDateChange}
+                    />
+                  )}
+                </VStack>
+                <VStack bg="coolGray.100" px={3} py={1} borderRadius="md">
+                  <HStack alignItems="center" justifyContent="space-between">
+                    <Text color="coolGray.600">Público</Text>
+                    <Switch
+                      isChecked={lastScreen === 'UserProfile' ? false : isPublic}
+                      isDisabled={lastScreen === 'UserProfile'}
+                      onToggle={setIsPublic}
+                      colorScheme="indigo"
+                    />
+                  </HStack>
+                </VStack>
+              </>
+            )}
+          </VStack>
         </VStack>
         <VStack space={2}>
           <Text fontSize="sm" color="coolGray.600" mb={1}>
@@ -281,7 +331,6 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
                       onChangeText={setRepetitions}
                       bg="coolGray.50"
                       borderRadius="md"
-                     
                     />
                     <Input
                       flex={1}
@@ -314,7 +363,8 @@ export default function CreateTrainingScreen({ navigation }: NavigationProps) {
                       <HStack space={2} alignItems="center">
                         <MaterialIcons name="directions-run" size={14} color={colors.indigo[600]} />
                         <Text color="coolGray.700">
-                          {exercise.name} - {exercise.repetitions} reps / {exercise.rest_time} minutos
+                          {exercise.name} - {exercise.repetitions} reps / {exercise.rest_time}{' '}
+                          minutos
                         </Text>
                       </HStack>
                       <IconButton

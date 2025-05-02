@@ -22,6 +22,7 @@ export interface Meal {
     quantity: number;
     type: OptionType;
   }[];
+  time_to_eat: string;
 }
 export interface CreateDiet {
   title: string;
@@ -29,6 +30,8 @@ export interface CreateDiet {
   menu:Meal[];
   is_public: boolean;
   months_valid: number;
+  start_date?: string
+  user_id?: number
 }
 export interface DietsByProfissional{
   id: number;

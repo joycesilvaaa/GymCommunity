@@ -22,7 +22,7 @@ class CreateUser(BaseModel):
 
     @field_validator("password", mode="before")
     def set_password(cls, value: str) -> str:
-        from app.modules.security import PasswordManager
+        from app.modules.security import PasswordManager  # noqa:PLC0415
 
         return PasswordManager().password_hash(value)
 
@@ -36,7 +36,7 @@ class UpdateUser(BaseModel):
 
     @field_validator("password", mode="before")
     def set_password(cls, value: str | None) -> str | None:
-        from app.modules.security import PasswordManager
+        from app.modules.security import PasswordManager  # noqa:PLC0415
 
         return PasswordManager().password_hash(value) if value else None
 
@@ -60,3 +60,9 @@ class UserInfo(BaseModel):
     name: str
     user_profile: int
     email: str
+
+
+class RankingPoints(BaseModel):
+    id: int
+    name: str
+    points: int

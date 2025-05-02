@@ -25,6 +25,8 @@ import { UserConfig } from '@/screens/user/userConfig';
 import { NewClient } from '@/screens/clients/newClient';
 import ManagerAllFreeTraining from '@/screens/workouts/managerAllFreeTraining';
 import ExpiringWorkoutsScreen from '@/screens/workouts/expiringTraining';
+import  AllChats  from '@/screens/chat/allChats';
+import  ViewChat  from '@/screens/chat/viewChat';
 
 const Stack = createStackNavigator();
 
@@ -114,6 +116,16 @@ export function StackNavigator() {
             <Stack.Screen
               name="ExpiringWorkout"
               component={ExpiringWorkoutsScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AllChats"
+              component={AllChats}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ViewChat"
+              component={ViewChat}
               options={{ headerShown: false }}
             />
           </>

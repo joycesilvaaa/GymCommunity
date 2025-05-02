@@ -3,7 +3,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { Button, Box, Text, Icon, Center, VStack, Input, Pressable } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
-import { ModalCreateUser } from '@/components/modal/createUser';
+
 import { ItemCard } from '@/components/card/customItemCard';
 import routes from '@/api/api';
 import { IUserListPrevious } from '@/interfaces/user';
@@ -11,7 +11,7 @@ import { NavigationProps } from '@/interfaces/navigation';
 
 
 export function ManagerClients({ navigation }:NavigationProps) {
-  const [modalVisible, setModalVisible] = useState(false);
+ 
   const [users, setUsers] = useState<IUserListPrevious[]>([]);
 
 
@@ -83,11 +83,7 @@ export function ManagerClients({ navigation }:NavigationProps) {
         )}
       </Box>
 
-      <ModalCreateUser
-        navigation={navigation}
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-      />
+      
     </Layout>
   );
 }

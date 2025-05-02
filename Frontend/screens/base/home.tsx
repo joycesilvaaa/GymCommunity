@@ -3,22 +3,26 @@ import { Layout } from '@/components/layout';
 import { RetanguleCard } from '@/components/card/customRetanguleCard';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/auth';
-import  routes  from '@/api/api';
+import routes from '@/api/api';
 import { dietActualPrevious } from '@/interfaces/diet';
 import { WorkoutActualPrevious } from '@/interfaces/workout_plans';
 import { NavigationProps } from '@/interfaces/navigation';
 import { useEffect, useState } from 'react';
+import { formatedDateBr } from '@/utils';
 
 export function Home({ navigation }: NavigationProps) {
   const { user } = useAuth() as { user?: { id: number; user_profile: number } };
-  const [userType, setUserType] = useState<number>(user && user.user_profile ? user.user_profile : 1);
+  const [userType, setUserType] = useState<number>(
+    user && user.user_profile ? user.user_profile : 1,
+  );
   const [quantityFreeDiets, setQuantityFreeDiets] = useState<number>(0);
   const [quantityFreeWorkout, setQuantityFreeWorkout] = useState<number>(0);
   const [actualDietPrevius, setActualDietPrevius] = useState<dietActualPrevious | null>(null);
-  const [actualWorkoutPrevius, setActualWorkoutPrevius] = useState<WorkoutActualPrevious | null>(null);
+  const [actualWorkoutPrevius, setActualWorkoutPrevius] = useState<WorkoutActualPrevious | null>(
+    null,
+  );
   const [expiringDiet, setExpiringDiet] = useState<number>(0);
   const [expiringWorkout, setExpiringWorkout] = useState<number>(0);
-
 
   useEffect(() => {
     getquantityFreeDiets();
@@ -43,45 +47,46 @@ export function Home({ navigation }: NavigationProps) {
   async function getActualDietPrevius() {
     if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.actualDietPrevious(user.id);
-    console.log(response.data.data);
     setActualDietPrevius(response.data.data.length > 0 ? response.data.data[0] : null);
   }
   async function getActualWorkoutPrevius() {
     if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.actualWorkoutPrevious(user.id);
-    console.log(response.data.data);
     setActualWorkoutPrevius(response.data.data.length > 0 ? response.data.data[0] : null);
   }
   async function getQuantityFreeWorkout() {
     const response = await routes.quantityFreeWorkout();
-    console.log(response.data.data);
     setQuantityFreeWorkout(response.data.data.quantity);
   }
   async function getExpiringDiet() {
     if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.expiringDiet();
-    console.log(response.data.data);
     setExpiringDiet(response.data.data.length);
   }
   async function getExpiringWorkout() {
     if (!user?.id) return navigation.navigate('Initial');
     const response = await routes.expiringWorkouts();
-    console.log(response.data.data);
     setExpiringWorkout(response.data.data.length);
   }
-  
+
   const cardData = [
     {
       type: 'Dieta Atual',
-      description: actualDietPrevius ? `Dia inicial: ${actualDietPrevius.start_date}\nDia final: ${actualDietPrevius.end_date}` : 'Sem dietas atual',
+      description: actualDietPrevius 
+        ? `Dia inicial: ${formatedDateBr(actualDietPrevius.start_date)}\nDia final: ${formatedDateBr(actualDietPrevius.end_date)}`
+        : 'Sem dieta atual',
       icon: <MaterialIcons name="restaurant" />,
-      screen: actualDietPrevius? 'ViewDiet': 'Home',
+      screen: actualDietPrevius ? 'ViewDiet' : 'Home',
+      id: actualDietPrevius?.id,
     },
     {
       type: 'Treino Atual',
-      description: actualWorkoutPrevius ? `Dia inicial: ${actualWorkoutPrevius.start_date}\nDia final: ${actualWorkoutPrevius.end_date}` : 'Sem treinos atual',
+      description: actualWorkoutPrevius
+        ? `Dia inicial: ${formatedDateBr(actualWorkoutPrevius.start_date)}\nDia final: ${formatedDateBr(actualWorkoutPrevius.end_date)}`
+        : 'Sem treino atual',
       icon: <MaterialIcons name="fitness-center" />,
       screen: actualWorkoutPrevius ? 'ViewWorkout' : 'Home',
+      id: actualWorkoutPrevius?.id,
     },
     {
       type: 'Dietas Gratuitas',
@@ -99,7 +104,7 @@ export function Home({ navigation }: NavigationProps) {
       type: 'Lista de Compras',
       description: 'Visualize suas listas de compras',
       icon: <MaterialIcons name="shopping-cart" />,
-      screen: "ShoppingList",
+      screen: 'ShoppingList',
     },
   ];
 
@@ -141,7 +146,7 @@ export function Home({ navigation }: NavigationProps) {
       type: 'Treinos a Vencer',
       description: `Quantidade de treinos: ${expiringWorkout}`,
       icon: <MaterialIcons name="fitness-center" />,
-      screen: "ExpiringWorkout",
+      screen: 'ExpiringWorkout',
     },
     {
       type: 'Treinos Gratuitos',
@@ -159,9 +164,8 @@ export function Home({ navigation }: NavigationProps) {
 
   return (
     <Layout navigation={navigation}>
-      <Box  flex={1} bg="gray.50" p={4}  >
-        
-        {(userType === 1) &&
+      <Box flex={1} bg="gray.50" p={4}>
+        {userType === 1 &&
           cardData.map((card, index) => (
             <RetanguleCard
               key={index}
@@ -170,9 +174,10 @@ export function Home({ navigation }: NavigationProps) {
               icon={card.icon}
               navigation={navigation}
               screen={card.screen || ''}
+              route={card.id ? { params: { id: card.id } } : undefined}
             />
           ))}
-        {(userType === 2) &&
+        {userType === 2 &&
           cardDataPersonal.map((card, index) => (
             <RetanguleCard
               key={index}
@@ -183,7 +188,7 @@ export function Home({ navigation }: NavigationProps) {
               navigation={navigation}
             />
           ))}
-        {(userType === 3) &&
+        {userType === 3 &&
           cardDataNutricionista.map((card, index) => (
             <RetanguleCard
               key={index}

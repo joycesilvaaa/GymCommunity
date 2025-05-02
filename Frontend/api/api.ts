@@ -56,6 +56,12 @@ const routes = {
     ShoppingListById: (id: number) => api.get(`/shopping_list/${id}`),
     deleteShoppingList: (id: number) => api.delete(`/shopping_list/${id}`),
     createShoppingList: (form_data: IShoppingList) => api.post("/shopping_list/", form_data),
+    // chats
+    allChats: () => api.get(`/chat/all-by-user`),	
+    allSugestions: () => api.get(`/chat/sugestions`),
+    createConversation: (user_id: number) => api.post(`/chat/create/${user_id}`),
+    sendMessage: (form_data: any) => api.post("/chat/send-message", form_data),
+    getMessages: (chat_id: number) => api.get(`/chat/messages/${chat_id}`),
 
     
 }

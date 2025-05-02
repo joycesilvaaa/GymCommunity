@@ -13,9 +13,9 @@ from app.schemas.workout_plans import (
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
     ListWorkoutPlanActual,
+    PreviousWorkoutPlan,
     UpdateWorkoutPlan,
     WorkoutPlanData,
-    PreviousWorkoutPlan,
 )
 
 router_workout_plan = APIRouter(tags=["workout_plans"], prefix="/workout-plans")
@@ -27,7 +27,9 @@ async def create_workout_plan(
     user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[None]:
-    return await WorkoutPlanController(session).create_workout_plan(user, workout_plan)
+    return await WorkoutPlanController(session).create_workout_plan(
+        user, workout_plan
+    )
 
 
 @router_workout_plan.get("/last-finished")
@@ -60,6 +62,7 @@ async def get_quantity_free_workout_plans(
 ) -> BasicResponse[AllFreeWorkoutPlanQuantity]:
     return await WorkoutPlanController(session).get_quantity_free_workout_plans()
 
+
 @router_workout_plan.get("/all-free")
 async def get_all_free_workout_plans(
     user: UserInfo = Depends(AuthManager.has_authorization),
@@ -67,12 +70,16 @@ async def get_all_free_workout_plans(
 ) -> BasicResponse[list[PreviousWorkoutPlan]]:
     return await WorkoutPlanController(session).get_all_free_workout_plans()
 
+
 @router_workout_plan.get("/all-free-by-professional")
 async def get_all_free_workout_plans_by_professional(
     user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[PreviousWorkoutPlan]]:
-    return await WorkoutPlanController(session).get_all_free_workout_plan_by_professional(user)
+    return await WorkoutPlanController(
+        session
+    ).get_all_free_workout_plan_by_professional(user)
+
 
 @router_workout_plan.get("/actual")
 async def get_workout_plan_actual(

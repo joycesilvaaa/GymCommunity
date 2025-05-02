@@ -6,10 +6,11 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text, update
 
-from app.core.db_model import User, UserRelations
+from app.core.db_model import User, UserPoints, UserRelations
 from app.schemas.user import (
     ClientInfo,
     CreateUser,
+    RankingPoints,
     UpdateUser,
     UserDetail,
     UserInfo,
@@ -20,7 +21,6 @@ from app.schemas.user import (
 class UserService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
-
 
     async def get_user_by_cpf(self, cpf: str) -> UserInfo | None:
         query = text(
@@ -64,24 +64,9 @@ class UserService:
         user = result.fetchone()
         return UserInfo(**user._asdict()) if user else None
 
-    async def get_user_by_cpf(self, cpf: str) -> UserInfo | None:
-        query = text(
-            """SELECT
-                id,
-                email,
-                user_profile,
-                "name"
-            FROM users
-            WHERE cpf = :cpf
-        """
-        ).bindparams(bindparam("cpf", cpf))
-        result: CursorResult = await self._session.execute(query)  # type: ignore[type-arg, assignment]
-        user = result.fetchone()
-        return UserInfo(**user._asdict()) if user else None
-
     async def get_clients_for_professional(self, user_id: int) -> list[ClientInfo]:
         query = text(
-            """select 
+            """select
                     u.id,
                     u."name",
                     u.cpf,
@@ -95,7 +80,7 @@ class UserService:
         result: CursorResult = await self._session.execute(query)
         clients = result.fetchall()
         return [ClientInfo(**client._asdict()) for client in clients]
-    
+
     async def get_user_details(self, user_id: int) -> UserDetail:
         query = text(
             """SELECT
@@ -103,7 +88,7 @@ class UserService:
                     u."name",
                     ut.id AS user_training_id,
                     ud.id AS user_diets_id
-                FROM users u 
+                FROM users u
                 LEFT JOIN user_diets ud
                     ON u.id = ud.user_id
                     AND ud.is_completed = TRUE
@@ -124,12 +109,20 @@ class UserService:
         self, user_id: int, professional_id: int
     ) -> None:
         await self._create_user_relation(user_id, professional_id)
-    
+
     async def create_user(self, form_user: CreateUser) -> None:
         await self._validate_user_uniqueness(form_user)
         user = await self._create_user_record(form_user)
+        if form_user.user_profile == 1:
+            await self.create_user_points(user.id)
         if form_user.professional_id:
             await self._create_user_relation(user.id, form_user.professional_id)
+
+    async def create_user_points(self, user_id: int) -> None:
+        user_points = UserPoints(user_id=user_id)
+        self._session.add(user_points)
+        await self._session.flush()
+        await self._session.commit()
 
     async def _create_user_record(self, form_user: CreateUser) -> User:
         user_data = form_user.model_dump(exclude={"professional_id"})
@@ -185,5 +178,19 @@ class UserService:
             raise HTTPException(status_code=400, detail="Email already in use")
         if await self.get_user_by_cpf(form_user.cpf):
             raise HTTPException(status_code=400, detail="CPF already in use")
-    
-    
+
+    async def get_ranking_points(self) -> list[RankingPoints]:
+        query = text(
+            """SELECT
+                    u.id,
+                    u."name",
+                    up.points
+                FROM users u
+                JOIN user_points up
+                ON u.id = up.user_id
+                ORDER BY up.points DESC
+            """
+        )
+        result: CursorResult = await self._session.execute(query)
+        ranking = result.fetchall()
+        return [RankingPoints(**user._asdict()) for user in ranking]
