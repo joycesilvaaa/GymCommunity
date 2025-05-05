@@ -9,10 +9,11 @@ from app.schemas.workout_plans import (
     CreateWorkoutPlan,
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
-    ListWorkoutPlanActual,
+    ActualWorkoutPlanPrevious,
     PreviousWorkoutPlan,
     UpdateWorkoutPlan,
     WorkoutPlanData,
+    WorkoutPlan,
 )
 from app.service.workout_plans import WorkoutPlanService
 
@@ -23,28 +24,35 @@ class WorkoutPlanController:
         self._service = WorkoutPlanService(session)
 
     async def get_workout_plan_actual(
-        self, user_id: int
-    ) -> BasicResponse[list[WorkoutPlanData]]:
+        self, user: UserInfo
+    ) -> BasicResponse[WorkoutPlanData | None]:
         try:
-            workout_plan = await self._service.get_workout_plan_actual(user_id)
+            workout_plan = await self._service.get_workout_plan_actual(user.id)
             return BasicResponse(data=workout_plan)
-        except HTTPException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            )
+        
+    async def finish_daily_training(
+        self, user: UserInfo, daily_training: int
+    ) -> BasicResponse[None]:
+        try:
+            await self._service.finish_daily_training(user.id, daily_training)
+            return BasicResponse()
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
 
     async def get_workout_plan_actual_previous(
-        self, user_id: int
-    ) -> BasicResponse[list[ListWorkoutPlanActual]]:
+        self, user : UserInfo
+    ) -> BasicResponse[ActualWorkoutPlanPrevious | None]:
         try:
             workout_plan = await self._service.get_workout_plan_actual_previous(
-                user_id
+                user.id
             )
             return BasicResponse(data=workout_plan)
-        except HTTPException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
@@ -52,14 +60,12 @@ class WorkoutPlanController:
 
     async def get_workout_plan_by_id(
         self, workout_plan_id: int
-    ) -> BasicResponse[list[WorkoutPlanData]]:
+    ) -> BasicResponse[WorkoutPlan | None]:
         try:
             workout_plan = await self._service.get_workout_plan_by_id(
                 workout_plan_id
             )
             return BasicResponse(data=workout_plan)
-        except HTTPException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

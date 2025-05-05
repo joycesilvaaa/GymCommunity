@@ -9,11 +9,8 @@ import routes from '@/api/api';
 import { IUserListPrevious } from '@/interfaces/user';
 import { NavigationProps } from '@/interfaces/navigation';
 
-
-export function ManagerClients({ navigation }:NavigationProps) {
- 
+export function ManagerClients({ navigation }: NavigationProps) {
   const [users, setUsers] = useState<IUserListPrevious[]>([]);
-
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -27,47 +24,37 @@ export function ManagerClients({ navigation }:NavigationProps) {
     try {
       const response = await routes.clientsForProfissional();
       setUsers(response.data.data);
-      
     } catch (error) {
       console.error('Error fetching clients:', error);
     }
   }
 
-
-
-
   return (
     <Layout navigation={navigation}>
-      <Box flex={1} bg="gray.50" p={4} >
-        
+      <Box flex={1} bg="gray.50" p={4}>
         <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb={4}>
           <Text fontSize="xl" color="indigo.600" fontWeight="bold">
             Clientes
           </Text>
           {users.length > 0 && (
-            <Button onPress={() => navigation.navigate("NewClient")} colorScheme="indigo">
-            Novo Cliente
-          </Button>
+            <Button onPress={() => navigation.navigate('NewClient')} colorScheme="indigo">
+              Novo Cliente
+            </Button>
           )}
-          
         </Box>
 
         {users.length === 0 ? (
-            <Center flex={1} mt={5}>
+          <Center flex={1} mt={5}>
             <VStack space={4} alignItems="center">
               <Icon as={MaterialIcons} name="group" size="xl" color="gray.400" />
               <Text fontSize="lg" color="gray.500" textAlign="center">
-              Nenhum cliente vinculado ao seu perfil ainda.
+                Nenhum cliente vinculado ao seu perfil ainda.
               </Text>
-              <Button
-              onPress={() => navigation.navigate("NewClient")}
-              colorScheme="indigo"
-              mt={2}
-              >
-              Adicionar Novo Cliente
+              <Button onPress={() => navigation.navigate('NewClient')} colorScheme="indigo" mt={2}>
+                Adicionar Novo Cliente
               </Button>
             </VStack>
-            </Center>
+          </Center>
         ) : (
           users.map((user) => (
             <ItemCard
@@ -82,9 +69,6 @@ export function ManagerClients({ navigation }:NavigationProps) {
           ))
         )}
       </Box>
-
-      
     </Layout>
   );
 }
-

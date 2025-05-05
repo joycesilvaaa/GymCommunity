@@ -7,6 +7,7 @@ import { Center, VStack } from 'native-base';
 import { ItemCard } from '@/components/card/customItemCard';
 import routes from '@/api/api';
 import { ViewWorkout } from '@/interfaces/workout_plans';
+import Loading from '@/components/loading';
 
 function ManagerAllFreeTraining({ navigation }: NavigationProps) {
   const [workouts, setWorkouts] = useState<ViewWorkout[]>([]);
@@ -34,12 +35,7 @@ function ManagerAllFreeTraining({ navigation }: NavigationProps) {
   if (isLoading) {
     return (
       <Layout navigation={navigation}>
-        <Center flex={1}>
-          <Icon as={MaterialIcons} name="fitness-center" size="xl" color="gray.400" />
-          <Text fontSize="lg" color="gray.500" textAlign="center">
-            Carregando treinos gratuitos...
-          </Text>
-        </Center>
+        <Loading />
       </Layout>
     );
   }
@@ -81,7 +77,7 @@ function ManagerAllFreeTraining({ navigation }: NavigationProps) {
               title={workout.title}
               description={workout.description}
               navigation={navigation}
-              screen="ViewWorkout"
+              screen="ViewWourkout"
               id={workout.id.toString()}
               iconName="fitness-center"
             />

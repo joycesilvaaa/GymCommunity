@@ -18,18 +18,22 @@ function AllChats({ navigation }: NavigationProps) {
   const [sugestions, setSuggestions] = useState<SugestionChat[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+
   useEffect(() => {
-    fetchChats();
-    fetchSuggestions();
-  }
-  , []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchChats();
+      fetchSuggestions();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   async function createConversation(user_id: number) {
     try {
       const response = await routes.createConversation(user_id);
       if (response.status === 200) {
         console.log('Conversa criada com sucesso!');
-        navigation.navigate('ViewChat', { chat_id: response.data.chat_id });
+        navigation.navigate('ViewChat', { chat_id: response.data.data.chat_id });
       }
     } catch (error) {
       console.error('Error creating conversation:', error);

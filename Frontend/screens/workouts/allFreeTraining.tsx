@@ -1,4 +1,4 @@
-import { FormCreate } from '@/components/forms/formCreate'; 
+import { FormCreate } from '@/components/forms/formCreate';
 import { NavigationProp } from '@react-navigation/native';
 import { Button, View, Text, Icon, Center, VStack, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -10,52 +10,43 @@ import { NavigationProps } from '@/interfaces/navigation';
 import { ViewWorkout } from '@/interfaces/workout_plans';
 import { useEffect } from 'react';
 import routes from '@/api/api';
+import Loading from '@/components/loading';
 
+export function AllFreeWorkouts({ navigation }: NavigationProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [workouts, setWorkouts] = useState<ViewWorkout[]>([]);
 
-
-export function AllFreeWorkouts({ navigation }: NavigationProps) {  
-    const [isLoading, setIsLoading] = useState(true);
-    const [workouts, setWorkouts] = useState<ViewWorkout[]>([]);
-    
   useEffect(() => {
     fetchWorkouts();
   }, []);
-  
-  
+
   async function fetchWorkouts() {
     try {
       const response = await routes.allFreeWorkouts();
       setWorkouts(response.data.data);
       setIsLoading(false);
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error fetching workouts:', error);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   }
   if (isLoading) {
     return (
       <Layout navigation={navigation}>
-        <Center flex={1}>
-          <Icon as={MaterialIcons} name="fitness-center" size="xl" color="gray.400" />
-          <Text fontSize="lg" color="gray.500" textAlign="center">
-            Carregando treinos gratuitos...
-          </Text>
-        </Center>
+        <Loading />
       </Layout>
     );
   }
-    return (
-        <Layout navigation={navigation} >
-            <Box flex={1} bg="gray.50" p={4}>
-            <View flexDirection="row" justifyContent="space-between" alignItems="center" mb={4}>
-                <Text fontSize="xl" color="indigo.700" fontWeight="bold" textAlign="center">
-                Treinos
-                </Text>
-            </View>
-            {workouts.length === 0 ? (
+  return (
+    <Layout navigation={navigation}>
+      <Box flex={1} bg="gray.50" p={4}>
+        <View flexDirection="row" justifyContent="space-between" alignItems="center" mb={4}>
+          <Text fontSize="xl" color="indigo.700" fontWeight="bold" textAlign="center">
+            Treinos
+          </Text>
+        </View>
+        {workouts.length === 0 ? (
           <Center flex={1} mt={5}>
             <VStack space={4} alignItems="center">
               <Icon as={MaterialIcons} name="fitness-center" size="xl" color="gray.400" />
@@ -77,13 +68,13 @@ export function AllFreeWorkouts({ navigation }: NavigationProps) {
               title={workout.title}
               description={`${workout.description}\nCriado por: ${workout?.professional_name}`}
               navigation={navigation}
-              screen="ViewWorkout"
+              screen="ViewWourkout"
               id={workout.id.toString()}
               iconName="fitness-center"
             />
           ))
         )}
-        </Box>
-            
-        </Layout>)
+      </Box>
+    </Layout>
+  );
 }

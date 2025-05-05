@@ -8,15 +8,18 @@ import { Alert } from 'react-native';
 import { useEffect, useState } from 'react';
 import { MaterialIcons, AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { SettingsItem } from '@/components/settingsItem';
+import Loading from '@/components/loading';
 
 export function UserProfile({ navigation, route }: NavigationProps) {
   const { id } = route.params;
   const context = useAuth();
   const { user } = context;
   const [userDetails, setUserDetails] = useState<IUserDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     getUserProfile();
+    setIsLoading(false);
   }, [id]);
 
   async function getUserProfile() {
@@ -43,7 +46,13 @@ export function UserProfile({ navigation, route }: NavigationProps) {
       Alert.alert('Erro', 'Não foi possível remover o vínculo.');
     }
   }
-
+  if (isLoading) {
+    return (
+      <Layout navigation={navigation}>
+        <Loading />
+      </Layout>
+    );
+  }
   return (
     <Layout navigation={navigation}>
       <Box flex={1} bg="gray.50">
@@ -53,11 +62,11 @@ export function UserProfile({ navigation, route }: NavigationProps) {
             <Avatar
               size="2xl"
               source={{ uri: 'https://example.com/profile.jpg' }}
-              bg="indigo.100"
+              bg="indigo.300"
               borderWidth={2}
               borderColor="indigo.100"
             >
-              JD
+              {userDetails?.name.charAt(0).toUpperCase()}
             </Avatar>
             <Text fontSize="2xl" fontWeight="bold" mt={4} textAlign="center">
               {userDetails?.name}

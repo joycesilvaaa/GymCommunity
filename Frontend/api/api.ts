@@ -45,11 +45,14 @@ const routes = {
     
     //treinos
     quantityFreeWorkout: () => api.get("/workout-plans/all-free-quantity"),
-    actualWorkoutPrevious: (user_id: number) => api.get("/workout-plans/actual-previous",{params: {user_id: user_id}}),
+    actualWorkoutPrevious: () => api.get("/workout-plans/actual-previous"),
     expiringWorkouts: () => api.get("/workout-plans/expiring"),
     createTraining: (form_data: CreateTraining) => api.post("/workout-plans/", form_data),
     allFreeWorkouts: () => api.get("/workout-plans/all-free"),
     allFreeDietsByProfissional: () => api.get("/workout-plans/all-free-by-professional"),
+    workoutActual: () => api.get(`/workout-plans/actual`),
+    finishDailyWorkout: (id: number) => api.patch(`/workout-plans/finish-daily-workout/${id}`),
+    workoutById: (id: number) => api.get(`/workout-plans/${id}`),
     //shopping
     allShoppingList: () => api.get("/shopping_list/all-shopping-list"),
     shoppingListActual: () => api.get("/shopping_list/actual"),
@@ -60,8 +63,9 @@ const routes = {
     allChats: () => api.get(`/chat/all-by-user`),	
     allSugestions: () => api.get(`/chat/sugestions`),
     createConversation: (user_id: number) => api.post(`/chat/create/${user_id}`),
-    sendMessage: (form_data: any) => api.post("/chat/send-message", form_data),
-    getMessages: (chat_id: number) => api.get(`/chat/messages/${chat_id}`),
+    sendMessage: (form_data: any) => api.post("/chat/", form_data),
+    getMessages: (chat_id: number) => api.get(`/chat/${chat_id}`),
+    getNameOtherPerson: (chat_id: number) => api.get(`/chat/other-user-name/${chat_id}`),
 
     
 }

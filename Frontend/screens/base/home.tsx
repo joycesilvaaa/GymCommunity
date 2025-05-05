@@ -9,6 +9,7 @@ import { WorkoutActualPrevious } from '@/interfaces/workout_plans';
 import { NavigationProps } from '@/interfaces/navigation';
 import { useEffect, useState } from 'react';
 import { formatedDateBr } from '@/utils';
+import Loading from '@/components/loading';
 
 export function Home({ navigation }: NavigationProps) {
   const { user } = useAuth() as { user?: { id: number; user_profile: number } };
@@ -23,6 +24,7 @@ export function Home({ navigation }: NavigationProps) {
   );
   const [expiringDiet, setExpiringDiet] = useState<number>(0);
   const [expiringWorkout, setExpiringWorkout] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     getquantityFreeDiets();
@@ -38,6 +40,7 @@ export function Home({ navigation }: NavigationProps) {
       getExpiringDiet();
       getExpiringWorkout();
     }
+    setIsLoading(false);
   }, []);
 
   async function getquantityFreeDiets() {
@@ -51,8 +54,8 @@ export function Home({ navigation }: NavigationProps) {
   }
   async function getActualWorkoutPrevius() {
     if (!user?.id) return navigation.navigate('Initial');
-    const response = await routes.actualWorkoutPrevious(user.id);
-    setActualWorkoutPrevius(response.data.data.length > 0 ? response.data.data[0] : null);
+    const response = await routes.actualWorkoutPrevious();
+    setActualWorkoutPrevius(response.data.data);
   }
   async function getQuantityFreeWorkout() {
     const response = await routes.quantityFreeWorkout();
@@ -85,8 +88,19 @@ export function Home({ navigation }: NavigationProps) {
         ? `Dia inicial: ${formatedDateBr(actualWorkoutPrevius.start_date)}\nDia final: ${formatedDateBr(actualWorkoutPrevius.end_date)}`
         : 'Sem treino atual',
       icon: <MaterialIcons name="fitness-center" />,
-      screen: actualWorkoutPrevius ? 'ViewWorkout' : 'Home',
-      id: actualWorkoutPrevius?.id,
+      screen:actualWorkoutPrevius? 'ViewWourkout': 'Home', 
+    },
+    // {
+    //   type: 'Metas',
+    //   description: 'Visualize suas metas',
+    //   icon: <MaterialIcons name="flag" />,
+    //   screen: 'HealthGoals',
+    // },
+    {
+      type: 'Lista de Compras',
+      description: 'Visualize suas listas de compras',
+      icon: <MaterialIcons name="shopping-cart" />,
+      screen: 'ShoppingList',
     },
     {
       type: 'Dietas Gratuitas',
@@ -99,12 +113,6 @@ export function Home({ navigation }: NavigationProps) {
       description: `Quantidade de treinos disponíveis: ${quantityFreeWorkout}`,
       icon: <MaterialIcons name="directions-run" />,
       screen: quantityFreeWorkout > 0 ? 'AllFreeWorkout' : 'Home',
-    },
-    {
-      type: 'Lista de Compras',
-      description: 'Visualize suas listas de compras',
-      icon: <MaterialIcons name="shopping-cart" />,
-      screen: 'ShoppingList',
     },
   ];
 
@@ -161,6 +169,14 @@ export function Home({ navigation }: NavigationProps) {
       screen: 'ManagerMyFreeTraining',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <Layout navigation={navigation}>
+        <Loading/>
+      </Layout>
+    );
+  }
 
   return (
     <Layout navigation={navigation}>

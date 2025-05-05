@@ -18,7 +18,6 @@ import { ListShopping } from '@/screens/shoppingList/listShopping';
 import { ViewShoppingList } from '@/screens/shoppingList/viewShoppingList';
 import CreateTrainingScreen from '@/screens/workouts/createWorkouts';
 import { AllFreeWorkouts } from '@/screens/workouts/allFreeTraining';
-import { ViewTraining } from '@/screens/workouts/viewWorkout';
 import { AuthProvider } from '@/context/auth';
 import { useAuth } from '@/hooks/auth';
 import { UserConfig } from '@/screens/user/userConfig';
@@ -27,7 +26,10 @@ import ManagerAllFreeTraining from '@/screens/workouts/managerAllFreeTraining';
 import ExpiringWorkoutsScreen from '@/screens/workouts/expiringTraining';
 import  AllChats  from '@/screens/chat/allChats';
 import  ViewChat  from '@/screens/chat/viewChat';
-
+import  WorkoutScreen  from '@/screens/workouts/workoutView';
+import StartWorkoutScreen from '@/screens/workouts/startWorkout';
+import WorkoutCompleteScreen from '@/screens/workouts/completWorkout';
+import HealthGoalsScreen from '@/screens/healthGoal/healthGoal';
 const Stack = createStackNavigator();
 
 export function StackNavigator() {
@@ -37,6 +39,7 @@ export function StackNavigator() {
       <Stack.Navigator>
         {user ? (
           <>
+          
             <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
             <Stack.Screen 
               name="ManangerClients"
@@ -95,11 +98,6 @@ export function StackNavigator() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="ViewTraining"
-              component={ViewTraining}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
               name="UserConfig"
               component={UserConfig}
               options={{ headerShown: false }}
@@ -128,6 +126,28 @@ export function StackNavigator() {
               component={ViewChat}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="ViewWourkout"
+              component={WorkoutScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="WorkoutComplete"
+              component={WorkoutCompleteScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+            name="StartWorkout"
+            component={StartWorkoutScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="HealthGoals"
+            component={HealthGoalsScreen}
+            options={{ headerShown: false }}
+          />
+          
+           
           </>
         ) : (
           <>
@@ -143,6 +163,8 @@ export function StackNavigator() {
               component={CreateProfissional}
               options={{ headerShown: false }}
             />
+             
+           
           </>
         )}
       </Stack.Navigator>

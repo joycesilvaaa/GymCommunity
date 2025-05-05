@@ -7,6 +7,7 @@ import routes from '@/api/api';
 import { CreateDiet, Meal, OptionType } from '@/interfaces/diet';
 import { NavigationProps } from '@/interfaces/navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useEffect } from 'react';
 
 export default function CreateDietScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
@@ -21,9 +22,14 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
   const [selectedMealIndex, setSelectedMealIndex] = useState<number | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(true);
   const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
   const { id } = route.params || { id: null };
+  useEffect(() => {
+    if (lastScreen === 'UserProfile') {
+      setIsPublic(false);
+    }
+  }, [lastScreen]);
 
   function onDateChange(event: any, selectedDate?: Date) {
     const currentDate = selectedDate || startDate;
@@ -230,7 +236,7 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
                 onTrackColor="indigo.400"
                 isChecked={lastScreen === 'UserProfile' ? false : isPublic}
                 isDisabled={lastScreen === 'UserProfile'}
-                onToggle={setIsPublic}
+                onToggle={() => setIsPublic(!isPublic)}
               />
             </HStack>
           </HStack>

@@ -12,6 +12,7 @@ import { IAllFreeDiets } from '@/interfaces/diet';
 import routes from '@/api/api';
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
+import Loading from '@/components/loading';
 
 export function AllFreeDiets({ navigation }: NavigationProps) {
   const [diets, setDiets] = useState<IAllFreeDiets[]>([]);
@@ -36,12 +37,7 @@ export function AllFreeDiets({ navigation }: NavigationProps) {
   if (isLoading) {
     return (
       <Layout navigation={navigation}>
-        <VStack flex={1} justifyContent="center" alignItems="center">
-          <Spinner size="lg" color="indigo.600" />
-          <Text mt={4} color="coolGray.600">
-            Carregando dietas...
-          </Text>
-        </VStack>
+        <Loading />
       </Layout>
     );
   }

@@ -6,6 +6,9 @@ from pydantic import BaseModel
 
 class Options(BaseModel):
     name: str
+    image_url: str | None = None
+    description: str
+    muscle_group: str
     repetitions: str
     rest_time: int
 
@@ -25,11 +28,17 @@ class WorkoutPlanData(BaseModel):
     time_to_workout: str
     daily_training: int
     completed_days: int
-    last_update: datetime
+    type: str
+
+class WorkoutPlan(BaseModel):
+    id : int
+    title: str
+    description: str
+    plans : list[Plan] = []
     type: str
 
 
-class ListWorkoutPlanActual(BaseModel):
+class ActualWorkoutPlanPrevious(BaseModel):
     id: int
     start_date: datetime
     end_date: datetime

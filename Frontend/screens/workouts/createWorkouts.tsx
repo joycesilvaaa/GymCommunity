@@ -17,9 +17,10 @@ import { Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Layout } from '@/components/layout';
 import { NavigationProps } from '@/interfaces/navigation';
-import { CreateTraining, TrainingPlan } from '@/interfaces/workout_plans';
+import { CreateTraining, WorkoutPlan, Exercise } from '@/interfaces/workout_plans';
 import routes from '@/api/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useEffect } from 'react';
 
 export default function CreateTrainingScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
@@ -31,15 +32,25 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
   const [exerciseName, setExerciseName] = useState('');
   const [repetitions, setRepetitions] = useState('');
   const [restTime, setRestTime] = useState('');
-  const [plans, setPlans] = useState<TrainingPlan[]>([]);
+  const [image_url, setImageUrl] = useState<string | undefined>(undefined);
+  const [descriptionExercise, setDescriptionExercise] = useState('');
+  const [muscleGroup, setMuscleGroup] = useState('');
+  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [monthsValid, setMonthsValid] = useState('');
   const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const toast = useToast();
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [startDate, setStartDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
   const { id } = route.params || { id: null };
+  const [timeToWorkout, setTimeToWorkout] = useState<string>('');
+
+  useEffect(() => {
+    if (lastScreen === 'UserProfile') {
+      setIsPublic(false);
+    }
+  }, [lastScreen]);
 
   function handleAddPlan() {
     if (!planTitle.trim()) {
@@ -56,11 +67,14 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
       return;
     }
 
-    const newExercise = {
+    const newExercise: Exercise = {
       name: exerciseName,
       repetitions: repetitions,
       rest_time: Number(restTime),
+      description: descriptionExercise,
+      muscle_group: muscleGroup,
     };
+    if (image_url) newExercise.image_url = image_url;
 
     const updatedPlans = [...plans];
     updatedPlans[selectedPlanIndex!].exercises.push(newExercise);
@@ -69,6 +83,9 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
     setExerciseName('');
     setRepetitions('');
     setRestTime('');
+    setImageUrl(undefined);
+    setDescriptionExercise('');
+    setMuscleGroup('');
   }
 
   function handleRemoveExercise(planIndex: number, exerciseIndex: number) {
@@ -81,6 +98,10 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
     setPlans(plans.filter((_, i) => i !== index));
     if (selectedPlanIndex === index) setSelectedPlanIndex(null);
   }
+  function showDatePickerDialog() {
+    setShowDatePicker(true);
+}
+
 
   async function handleSubmit() {
     if (plans.length === 0 || plans.some((plan) => plan.exercises.length === 0)) {
@@ -104,8 +125,10 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
       }
       newTraining.user_id = id;
       newTraining.start_date = startDate.toISOString().split('T')[0];
+      newTraining.time_to_workout = timeToWorkout;
     }
     try {
+      console.log('Criando treino:', newTraining);
       const response = await routes.createTraining(newTraining);
       if (response.status !== 200) {
         toast.show({
@@ -115,6 +138,11 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
         });
         return;
       }
+      toast.show({
+        title: 'Sucesso',
+        description: 'Treino criado com sucesso!',
+        bg: 'green.500',
+      });
     } catch (error) {
       console.error('Erro ao criar treino:', error);
       Alert.alert('Erro', 'Não foi possível criar o treino. Tente novamente mais tarde.');
@@ -126,9 +154,6 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
     const currentDate = selectedDate || startDate;
     setShowDatePicker(false);
     setStartDate(currentDate);
-  }
-  function showDatePickerDialog() {
-    setShowDatePicker(true);
   }
   return (
     <Layout navigation={navigation}>
@@ -190,6 +215,15 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
               borderRadius="md"
               keyboardType="numeric"
             />
+            <Input
+              flex={1}
+              variant="filled"
+              placeholder="Horário do treino"
+              value={timeToWorkout}
+              onChangeText={setTimeToWorkout}
+              bg="coolGray.100"
+              borderRadius="md"
+            />
           </HStack>
 
           <VStack space={2}>
@@ -197,37 +231,37 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
               <>
                 <VStack>
                   <Input
-                    placeholder="Data de Início"
-                    variant="filled"
-                    bg="coolGray.100"
-                    borderRadius="md"
-                    fontSize="sm"
-                    value={startDate ? startDate.toLocaleDateString() : ''}
-                    onFocus={showDatePickerDialog}
+                  placeholder="Data de Início"
+                  variant="filled"
+                  bg="coolGray.100"
+                  borderRadius="md"
+                  fontSize="sm"
+                  value={startDate ? startDate.toLocaleDateString() : ''}
+                  onFocus={showDatePickerDialog}
                   />
                   {showDatePicker && (
-                    <DateTimePicker
-                      testID="dateTimePicker"
-                      value={startDate || new Date()}
-                      mode="date"
-                      display="default"
-                      onChange={onDateChange}
-                    />
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={startDate || new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={onDateChange}
+                  />
                   )}
-                </VStack>
-                <VStack bg="coolGray.100" px={3} py={1} borderRadius="md">
-                  <HStack alignItems="center" justifyContent="space-between">
-                    <Text color="coolGray.600">Público</Text>
-                    <Switch
-                      isChecked={lastScreen === 'UserProfile' ? false : isPublic}
-                      isDisabled={lastScreen === 'UserProfile'}
-                      onToggle={setIsPublic}
-                      colorScheme="indigo"
-                    />
-                  </HStack>
                 </VStack>
               </>
             )}
+            <VStack bg="coolGray.100" px={3} py={1} borderRadius="md">
+              <HStack alignItems="center" justifyContent="space-between">
+                <Text color="coolGray.600">Público</Text>
+                <Switch
+                  isChecked={lastScreen === 'UserProfile' ? false : isPublic}
+                  isDisabled={lastScreen === 'UserProfile'}
+                  onToggle={() => setIsPublic(!isPublic)}
+                  colorScheme="indigo"
+                />
+              </HStack>
+            </VStack>
           </VStack>
         </VStack>
         <VStack space={2}>
@@ -313,7 +347,7 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
 
               {selectedPlanIndex === planIndex && (
                 <VStack space={3} mt={2}>
-                  <HStack space={2}>
+                  <HStack space={2} flexWrap="wrap">
                     <Input
                       variant="filled"
                       flex={1}
@@ -332,6 +366,8 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
                       bg="coolGray.50"
                       borderRadius="md"
                     />
+                  </HStack>
+                  <HStack space={2} flexWrap="wrap">
                     <Input
                       flex={1}
                       variant="filled"
@@ -341,6 +377,35 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
                       bg="coolGray.50"
                       borderRadius="md"
                       keyboardType="numeric"
+                    />
+                    <Input
+                      flex={1}
+                      variant="filled"
+                      placeholder="Musculo alvo"
+                      value={muscleGroup}
+                      onChangeText={setMuscleGroup}
+                      bg="coolGray.50"
+                      borderRadius="md"
+                    />
+                  </HStack>
+                  <HStack space={2} flexWrap="wrap">
+                    <Input
+                      flex={1}
+                      variant="filled"
+                      placeholder="descrição"
+                      value={descriptionExercise}
+                      onChangeText={setDescriptionExercise}
+                      bg="coolGray.50"
+                      borderRadius="md"
+                    />
+                    <Input
+                      flex={1}
+                      variant="filled"
+                      placeholder="Url da Imagem"
+                      value={image_url}
+                      onChangeText={setImageUrl}
+                      bg="coolGray.50"
+                      borderRadius="md"
                     />
                   </HStack>
                   <Button

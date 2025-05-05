@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text
 
 from app.core.db_model import Chat, ChatMessage, Participant
-from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat
+from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat, ChatOtherUserName
 
 
 class ChatService:
@@ -17,6 +17,7 @@ class ChatService:
         query = text(
             """
             SELECT
+                cm.id as chat_message,
                 c.id AS chat_id,
                 c.create_date,
                 cm.content,
@@ -27,24 +28,32 @@ class ChatService:
             FROM chats c
             JOIN chat_messages cm ON cm.chat_id = c.id
             JOIN users u_sender ON u_sender.id = cm.user_id
-            -- participantes do chat
-            JOIN participants p1 ON p1.chat_id = c.id
-            AND p1.user_id = :current_user_id
-            JOIN participants p2 ON p2.chat_id = c.id
-            AND p2.user_id != :current_user_id
-            JOIN users u_other ON u_other.id = p2.user_id
-            -- garante que o usuário está na relação
-            JOIN user_relations ur
-                ON (ur.user_id = :current_user_id
-                OR ur.professional_id = :current_user_id)
-            WHERE c.id = :chat_id
+            JOIN participants p ON p.chat_id = c.id
+            JOIN users u_other ON u_other.id = p.user_id
+            WHERE 
+                c.id = :chat_id
+                AND EXISTS (
+                    SELECT 1
+                    FROM participants p_current
+                    WHERE p_current.chat_id = c.id
+                    AND p_current.user_id = :current_user_id
+                )
+                AND u_other.id != :current_user_id
+                AND EXISTS (
+                    SELECT 1
+                    FROM user_relations ur
+                    WHERE 
+                        (ur.user_id = :current_user_id AND ur.professional_id = u_other.id)
+                        OR 
+                        (ur.professional_id = :current_user_id AND ur.user_id = u_other.id)
+                )
             ORDER BY cm.send_date ASC
         """
         ).bindparams(
             bindparam("current_user_id", user_id), bindparam("chat_id", chat_id)
         )
         result = await self._session.execute(query)
-        return [ChatMessage(**row._asdict()) for row in result.fetchall()]
+        return [ChatMessages(**row._asdict()) for row in result.fetchall()]
 
     async def create_message(self, user_id: int, send_message: SendMessage) -> None:
         chat = await self._get_chat_by_id(send_message.chat_id)
@@ -130,3 +139,17 @@ class ChatService:
         ).bindparams(bindparam("user_id", user_id))
         result = await self._session.execute(query)
         return [SugestionChat(**user._asdict()) for user in result.fetchall()]
+
+    async def get_name_other_user(
+        self, user_id: int, chat_id: int
+    ) ->ChatOtherUserName :
+        query = text(
+            """
+            SELECT u.name AS other_person_name
+            FROM participants p
+            JOIN users u ON u.id = p.user_id
+            WHERE p.chat_id = :chat_id AND p.user_id != :user_id
+        """
+        ).bindparams(bindparam("user_id", user_id), bindparam("chat_id", chat_id))
+        result = await self._session.execute(query)
+        return ChatOtherUserName(other_user_name=result.scalar())

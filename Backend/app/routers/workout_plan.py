@@ -12,10 +12,11 @@ from app.schemas.workout_plans import (
     CreateWorkoutPlan,
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
-    ListWorkoutPlanActual,
+    ActualWorkoutPlanPrevious,
     PreviousWorkoutPlan,
     UpdateWorkoutPlan,
     WorkoutPlanData,
+    WorkoutPlan,
 )
 
 router_workout_plan = APIRouter(tags=["workout_plans"], prefix="/workout-plans")
@@ -31,13 +32,21 @@ async def create_workout_plan(
         user, workout_plan
     )
 
+@router_workout_plan.get("/actual")
+async def get_workout_plan_actual(
+    user: UserInfo = Depends(AuthManager.has_authorization),
+    session: AsyncSession = Depends(SessionConnection.session),
+) -> BasicResponse[WorkoutPlanData | None]:
+    return await WorkoutPlanController(session).get_workout_plan_actual(user)
+
+
 
 @router_workout_plan.get("/last-finished")
 async def get_name_of_last_finished_workout_plan(
     user: UserInfo = Depends(AuthManager.has_authorization),
-    controller: WorkoutPlanController = Depends(SessionConnection.session),
+    session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[LastFinishedWorkoutPlan]]:
-    return await controller.get_name_of_last_finished_workout_plan(user)
+    return await WorkoutPlanController(session).get_name_of_last_finished_workout_plan(user)
 
 
 @router_workout_plan.get("/expiring")
@@ -51,9 +60,9 @@ async def get_all_expiring_workout_plans(
 @router_workout_plan.get("/all-finished")
 async def get_all_finished_workout_plans(
     user: UserInfo = Depends(AuthManager.has_authorization),
-    controller: WorkoutPlanController = Depends(SessionConnection.session),
+    session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[WorkoutPlanData]]:
-    return await controller.get_all_finished_workout_plans(user)
+    return await WorkoutPlanController(session).get_all_finished_workout_plans(user)
 
 
 @router_workout_plan.get("/all-free-quantity")
@@ -81,30 +90,34 @@ async def get_all_free_workout_plans_by_professional(
     ).get_all_free_workout_plan_by_professional(user)
 
 
-@router_workout_plan.get("/actual")
-async def get_workout_plan_actual(
-    user_id: int,
-    controller: WorkoutPlanController = Depends(SessionConnection.session),
-) -> BasicResponse[list[WorkoutPlanData]]:
-    return await controller.get_workout_plan_actual(user_id)
-
 
 @router_workout_plan.get("/actual-previous")
 async def get_workout_plan_actual_previous(
-    user_id: int,
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
-) -> BasicResponse[list[ListWorkoutPlanActual]]:
+) -> BasicResponse[ActualWorkoutPlanPrevious | None]:
     return await WorkoutPlanController(session).get_workout_plan_actual_previous(
-        user_id
+        user
+    )
+
+@router_workout_plan.patch("/finish-daily-workout/{daily_training}")
+async def finish_daily_training(
+    daily_training: int,
+    user: UserInfo = Depends(AuthManager.has_authorization),
+    session: AsyncSession = Depends(SessionConnection.session),
+) -> BasicResponse[None]:
+    return await WorkoutPlanController(session).finish_daily_training(
+        user, daily_training
     )
 
 
-@router_workout_plan.get("/{diet_id}")
+@router_workout_plan.get("/{workout_plan_id}")
 async def get_workout_plan_by_id(
     workout_plan_id: int,
-    controller: WorkoutPlanController = Depends(SessionConnection.session),
-) -> BasicResponse[list[WorkoutPlanData]]:
-    return await controller.get_workout_plan_by_id(workout_plan_id)
+    user: UserInfo = Depends(AuthManager.has_authorization),
+    session: AsyncSession = Depends(SessionConnection.session),
+) -> BasicResponse[WorkoutPlan | None]:
+    return await WorkoutPlanController(session).get_workout_plan_by_id(workout_plan_id)
 
 
 @router_workout_plan.put("/{workout_plan_id}")

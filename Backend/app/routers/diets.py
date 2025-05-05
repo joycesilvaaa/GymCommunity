@@ -57,6 +57,7 @@ async def get_all_finished_diets(
 
 @router_diets.get("/all-free-quantity")
 async def get_quantity_free_diets(
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[AllFreeDietQuantity]:
     return await DietController(session).get_quantity_of_free_diets()
@@ -72,10 +73,10 @@ async def get_actual_diet(
 
 @router_diets.get("/actual-previous")
 async def get_actual_previous_diet(
-    user_id: int,
+    user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[ListDietActual]]:
-    return await DietController(session).get_diet_actual_previous(user_id)
+    return await DietController(session).get_diet_actual_previous(user.id)
 
 
 @router_diets.get("/by-profissional")

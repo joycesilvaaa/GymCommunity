@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
-from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat
+from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat,ChatOtherUserName
 from app.schemas.user import UserInfo
 from app.service.chat import ChatService
 
@@ -19,17 +19,15 @@ class ChatController:
         self, chat_id: int
     ) -> BasicResponse[list[ChatMessages]]:
         try:
-            return await self._service.get_all_messages(self._user.id, chat_id)
-        except HTTPException as e:
-            raise e
+            mensagens = await self._service.get_all_messages(self._user.id, chat_id)
+            return BasicResponse(data=mensagens)
         except Exception as e:
             raise e
 
     async def create_message(self, send_message: SendMessage) -> BasicResponse[None]:
         try:
-            return await self._service.create_message(self._user.id, send_message)
-        except HTTPException as e:
-            raise e
+            await self._service.create_message(self._user.id, send_message)
+            return  BasicResponse(data=None)
         except Exception as e:
             raise e
 
@@ -37,8 +35,6 @@ class ChatController:
         try:
             chats = await self._service.get_chats_by_user(self._user.id)
             return BasicResponse(data=chats)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -46,8 +42,6 @@ class ChatController:
         try:
             await self._service.delete_chat(self._user.id, chat_id)
             return BasicResponse(data=None)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -57,8 +51,6 @@ class ChatController:
             return BasicResponse(
                 data=chat,
             )
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -68,7 +60,14 @@ class ChatController:
             return BasicResponse(
                 data=sugestion,
             )
-        except HTTPException as e:
+        except Exception as e:
             raise e
+        
+    async def get_other_user_name(self, chat_id: int) -> BasicResponse[ChatOtherUserName]:
+        try:
+            other_user_name = await self._service.get_name_other_user(self._user.id, chat_id)
+            return BasicResponse(
+                data=other_user_name,
+            )
         except Exception as e:
             raise e

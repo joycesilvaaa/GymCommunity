@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class ChatMessages(BaseModel):
+    chat_message: int
     chat_id: int
     create_date: datetime
     content: str
@@ -37,3 +38,7 @@ class SugestionChat(BaseModel):
 
 class ChatId(BaseModel):
     chat_id: int
+
+
+class ChatOtherUserName(BaseModel):
+    other_user_name: str

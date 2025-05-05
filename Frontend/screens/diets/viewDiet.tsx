@@ -49,12 +49,9 @@ export function ViewDiet({ navigation, route }: NavigationProps) {
 
   async function getDiet() {
     try {
-      console.log('Fetching diet with ID:', id);
       const response = await routes.dietById(id);
-      console.log(response.data.data);
       setDiet(response.data.data[0]);
     } catch (error) {
-      console.error('Error fetching diet:', error);
       Alert.alert('Erro', 'Não foi possível carregar a dieta');
     }
   }
