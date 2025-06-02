@@ -8,15 +8,15 @@ from app.modules.basic_response import BasicResponse
 from app.routers.controller.workout_plan import WorkoutPlanController
 from app.schemas.user import UserInfo
 from app.schemas.workout_plans import (
+    ActualWorkoutPlanPrevious,
     AllFreeWorkoutPlanQuantity,
     CreateWorkoutPlan,
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
-    ActualWorkoutPlanPrevious,
     PreviousWorkoutPlan,
     UpdateWorkoutPlan,
-    WorkoutPlanData,
     WorkoutPlan,
+    WorkoutPlanData,
 )
 
 router_workout_plan = APIRouter(tags=["workout_plans"], prefix="/workout-plans")
@@ -32,6 +32,7 @@ async def create_workout_plan(
         user, workout_plan
     )
 
+
 @router_workout_plan.get("/actual")
 async def get_workout_plan_actual(
     user: UserInfo = Depends(AuthManager.has_authorization),
@@ -40,13 +41,14 @@ async def get_workout_plan_actual(
     return await WorkoutPlanController(session).get_workout_plan_actual(user)
 
 
-
 @router_workout_plan.get("/last-finished")
 async def get_name_of_last_finished_workout_plan(
     user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[LastFinishedWorkoutPlan]]:
-    return await WorkoutPlanController(session).get_name_of_last_finished_workout_plan(user)
+    return await WorkoutPlanController(
+        session
+    ).get_name_of_last_finished_workout_plan(user)
 
 
 @router_workout_plan.get("/expiring")
@@ -90,7 +92,6 @@ async def get_all_free_workout_plans_by_professional(
     ).get_all_free_workout_plan_by_professional(user)
 
 
-
 @router_workout_plan.get("/actual-previous")
 async def get_workout_plan_actual_previous(
     user: UserInfo = Depends(AuthManager.has_authorization),
@@ -99,6 +100,7 @@ async def get_workout_plan_actual_previous(
     return await WorkoutPlanController(session).get_workout_plan_actual_previous(
         user
     )
+
 
 @router_workout_plan.patch("/finish-daily-workout/{daily_training}")
 async def finish_daily_training(
@@ -117,7 +119,9 @@ async def get_workout_plan_by_id(
     user: UserInfo = Depends(AuthManager.has_authorization),
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[WorkoutPlan | None]:
-    return await WorkoutPlanController(session).get_workout_plan_by_id(workout_plan_id)
+    return await WorkoutPlanController(session).get_workout_plan_by_id(
+        workout_plan_id
+    )
 
 
 @router_workout_plan.put("/{workout_plan_id}")

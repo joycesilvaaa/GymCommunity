@@ -19,7 +19,14 @@ function WorkoutScreen({ navigation, route }: NavigationProps) {
   const [workoutData, setWorkoutData] = useState<WorkoutData>();
   const [isLoading, setIsLoading] = useState(true);
   const { id } = route.params || undefined;
-
+  useEffect(() => {
+    if (workoutData) {
+      console.log('Workout Data atualizado:', workoutData);
+      workoutData.plans[0]?.exercises.forEach((exercise, index) => {
+        console.log(`Exercise ${index + 1}:`, exercise); // Exibe cada exercício
+      });
+    }
+  }, [workoutData]);
   useEffect(() => {
     if (id) {
       getWorkoutDataById();
@@ -49,6 +56,7 @@ function WorkoutScreen({ navigation, route }: NavigationProps) {
     if (response.status === 200) {
       setWorkoutData(response.data.data);
       setIsLoading(false);
+
     } else {
       Toast.show({
         title: 'Erro ao carregar os dados do treino',

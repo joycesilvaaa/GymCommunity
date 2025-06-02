@@ -8,7 +8,7 @@ interface ImagePlayerProps {
 function ImageViewer({ imageUrl }: ImagePlayerProps) {
     return (
         <Image
-            source={{ uri: imageUrl }}
+            source={{ uri: "https://via.placeholder.com/150" }}
             alt="Image Viewer"
             width="100%"
             height="100%"

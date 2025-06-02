@@ -5,15 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.basic_response import BasicResponse
 from app.schemas.user import UserInfo
 from app.schemas.workout_plans import (
+    ActualWorkoutPlanPrevious,
     AllFreeWorkoutPlanQuantity,
     CreateWorkoutPlan,
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
-    ActualWorkoutPlanPrevious,
     PreviousWorkoutPlan,
     UpdateWorkoutPlan,
-    WorkoutPlanData,
     WorkoutPlan,
+    WorkoutPlanData,
 )
 from app.service.workout_plans import WorkoutPlanService
 
@@ -33,7 +33,7 @@ class WorkoutPlanController:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
-        
+
     async def finish_daily_training(
         self, user: UserInfo, daily_training: int
     ) -> BasicResponse[None]:
@@ -46,7 +46,7 @@ class WorkoutPlanController:
             )
 
     async def get_workout_plan_actual_previous(
-        self, user : UserInfo
+        self, user: UserInfo
     ) -> BasicResponse[ActualWorkoutPlanPrevious | None]:
         try:
             workout_plan = await self._service.get_workout_plan_actual_previous(

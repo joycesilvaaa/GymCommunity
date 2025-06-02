@@ -6,6 +6,8 @@ import { CreateDiet } from "@/interfaces/diet";
 import { AllFreeDiets } from "@/screens/diets/allFreeDiets";
 import { CreateTraining } from "@/interfaces/workout_plans";
 import { all } from "axios";
+import UserPoints from "@/screens/user/userPoints";
+import { create } from "react-test-renderer";
 
 const routes = {
     login: (form_data: login) => api.post(
@@ -27,6 +29,9 @@ const routes = {
     userDetails: (user_id: number) => api.get(`/user/detail/${user_id}`),
     userDetailsByCpf: (cpf: string) => api.get(`/user/details/cpf/${cpf}`),
     removeClient: (user_id: number) => api.delete(`/user/${user_id}`),
+    userPoints: () => api.get("/user/ranking-points"),
+    createPublicationProgress: (form_data: any) => api.post("/user-publication-progress", form_data, ),
+    createPublicationSuggestion: (form_data: any) => api.post("/user-publication-suggestion", form_data, ),
     associateClientWithProfissional: (user_id: number) => api.post(`/user/associate-client-professional/${user_id}`),
     //dietas
     quantityFreeDiets: () => api.get("/diets/all-free-quantity"),

@@ -180,7 +180,7 @@ class UserTraining(Base):
     )
 
 
-class UserProgressPost(Base):
+class UserPost(Base):
     __tablename__ = "user_progress_posts"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
@@ -192,6 +192,10 @@ class UserProgressPost(Base):
     )
     image_urls: Mapped[list[str]] = mapped_column(
         JSON, server_default=text("'[]'::jsonb"), comment="List of image URLs"
+    )
+    type_post: Mapped[int] = mapped_column(
+        Integer,
+        server_default=text("1"),
     )
     is_private: Mapped[bool] = mapped_column(
         Boolean,

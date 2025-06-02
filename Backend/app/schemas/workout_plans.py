@@ -30,11 +30,12 @@ class WorkoutPlanData(BaseModel):
     completed_days: int
     type: str
 
+
 class WorkoutPlan(BaseModel):
-    id : int
+    id: int
     title: str
     description: str
-    plans : list[Plan] = []
+    plans: list[Plan] = []
     type: str
 
 

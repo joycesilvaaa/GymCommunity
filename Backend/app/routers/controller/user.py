@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
@@ -7,6 +7,8 @@ from app.schemas.user import UserInfo
 from app.service.user import (
     ClientInfo,
     CreateUser,
+    CreateUserPostSuggestion,
+    CreateUserPublication,
     RankingPoints,
     UpdateUser,
     UserDetail,
@@ -107,11 +109,31 @@ class UserController:
         except Exception as e:
             raise e
 
-    async def get_ranking_points(self) -> BasicResponse[RankingPoints]:
+    async def get_ranking_points(self) -> BasicResponse[list[RankingPoints]]:
         try:
-            ranking_points = await self._service.get_ranking_points(self._user.id)
+            ranking_points = await self._service.get_ranking_points()
             return BasicResponse(data=ranking_points)
-        except HTTPException as e:
+        except Exception as e:
             raise e
+
+    async def create_publication_progress(
+        self, form_data: CreateUserPublication, imagens: list[UploadFile]
+    ) -> BasicResponse[None]:
+        try:
+            await self._service.create_user_publication(
+                self._user.id, form_data, imagens
+            )
+            return BasicResponse(data=None)
+        except Exception as e:
+            raise e
+
+    async def create_publication_tips_suggestions(
+        self, form_data: CreateUserPostSuggestion
+    ) -> BasicResponse[None]:
+        try:
+            await self._service.create_user_publication_suggestions(
+                self._user.id, form_data
+            )
+            return BasicResponse(data=None)
         except Exception as e:
             raise e

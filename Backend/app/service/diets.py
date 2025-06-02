@@ -170,7 +170,10 @@ class DietService:
         await self._session.commit()
         if form_diet.start_date is not None and form_diet.user_id is not None:
             await self._create_user_diet(
-                form_diet.user_id, diet.id, form_diet.start_date, form_diet.months_valid
+                form_diet.user_id,
+                diet.id,
+                form_diet.start_date,
+                form_diet.months_valid,
             )
 
     async def update_diet(self, diet_id: int, diet: UpdateDiet) -> None:

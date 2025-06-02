@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import bindparam, delete, text, update, select
+from sqlalchemy.sql import bindparam, delete, select, text, update
 
 from app.core.db_model import UserTraining, WorkoutPlans
 from app.schemas.workout_plans import (
+    ActualWorkoutPlanPrevious,
     AllFreeWorkoutPlanQuantity,
     CreateWorkoutPlan,
     ExpiringWorkoutPlans,
     LastFinishedWorkoutPlan,
-    ActualWorkoutPlanPrevious,
     PreviousWorkoutPlan,
     UpdateWorkoutPlan,
-    WorkoutPlanData,
     WorkoutPlan,
+    WorkoutPlanData,
 )
 
 
@@ -50,7 +50,6 @@ class WorkoutPlanService:
         result = await self._session.execute(query)
         workout_plans = result.fetchone()
         return WorkoutPlanData(**workout_plans._asdict()) if workout_plans else None
-            
 
     async def get_workout_plan_actual_previous(
         self, user_id: int
@@ -63,18 +62,17 @@ class WorkoutPlanService:
             id=workout_plan_id,
             start_date=start_date,
             end_date=end_date,
-        ) 
+        )
 
     async def get_quantity_of_free_workout_plans(self) -> AllFreeWorkoutPlanQuantity:
         quantity = await self._query.get_quantity_of_free_workout_plans()
-        return (AllFreeWorkoutPlanQuantity(quantity=quantity))
-    
+        return AllFreeWorkoutPlanQuantity(quantity=quantity)
+
     async def get_workout_plan_by_id(
         self, workout_plan_id: int
     ) -> WorkoutPlanData | None:
         workout_plan = await self._query.get_workout_plan_by_id(workout_plan_id)
         return WorkoutPlan(**workout_plan.__dict__) if workout_plan else None
-
 
     async def get_all_expiring_workout_plans(
         self, user_id: int
@@ -235,17 +233,17 @@ class WorkoutPlanService:
         await self._session.flush()
         await self._session.commit()
 
-    async def finish_daily_training(
-        self, user_id: int, daily_training: int
-    ) -> None:
+    async def finish_daily_training(self, user_id: int, daily_training: int) -> None:
         workout_plan = await self._query.get_actual_workout_plan_by_user_id(user_id)
-        user_training = await self._query.get_user_training_by_user_id(user_id, workout_plan.id)
+        user_training = await self._query.get_user_training_by_user_id(
+            user_id, workout_plan.id
+        )
         progress = self.__calculate_progress(
-                    user_training.start_date,
-                    user_training.end_date,
-                    workout_plan.days_per_week,
-                    user_training.completed_days + 1,
-                )
+            user_training.start_date,
+            user_training.end_date,
+            workout_plan.days_per_week,
+            user_training.completed_days + 1,
+        )
         if not user_training:
             raise ValueError("User training not found")
         await self._session.execute(
@@ -258,37 +256,42 @@ class WorkoutPlanService:
                 progress=progress,
                 daily_training=daily_training,
                 last_update=datetime.now(),
-                is_completed= progress >= 100.0,
-                is_actual= progress < 100.0,
+                is_completed=progress >= 100.0,
+                is_actual=progress < 100.0,
             )
         )
         await self._session.commit()
 
     @staticmethod
     def __calculate_end_date(
-        start_date: datetime, months_valid: int,
+        start_date: datetime,
+        months_valid: int,
     ) -> datetime:
         return start_date + relativedelta(months=months_valid)
-    
+
     @staticmethod
     def __calculate_progress(
-        start_date: datetime, end_date: datetime, days_per_week: int, completed_days: int
+        start_date: datetime,
+        end_date: datetime,
+        days_per_week: int,
+        completed_days: int,
     ) -> float:
         if start_date > end_date or days_per_week <= 0:
             return 0.0
 
-        total_days = (end_date - start_date).days + 1 
+        total_days = (end_date - start_date).days + 1
         full_weeks = total_days // 7
         remaining_days = total_days % 7
 
-        total_training_days = (full_weeks * days_per_week) + min(remaining_days, days_per_week)
+        total_training_days = (full_weeks * days_per_week) + min(
+            remaining_days, days_per_week
+        )
 
         if total_training_days == 0:
             return 0.0
 
         progress_percentage = (completed_days / total_training_days) * 100
         return round(progress_percentage, 2)
-        
 
 
 class WorkoutPlanQuerys:
@@ -299,10 +302,14 @@ class WorkoutPlanQuerys:
         self, user_id: int, workout_plan_id: int
     ) -> UserTraining | None:
         result = await self._session.execute(
-            select(UserTraining).where(UserTraining.user_id == user_id, UserTraining.is_actual, UserTraining.workout_plan_id == workout_plan_id)
+            select(UserTraining).where(
+                UserTraining.user_id == user_id,
+                UserTraining.is_actual,
+                UserTraining.workout_plan_id == workout_plan_id,
+            )
         )
         return result.scalar_one_or_none()
-    
+
     async def get_workout_plan_by_id(
         self, workout_plan_id: int
     ) -> WorkoutPlans | None:
@@ -310,15 +317,17 @@ class WorkoutPlanQuerys:
             select(WorkoutPlans).where(WorkoutPlans.id == workout_plan_id)
         )
         return result.scalar_one_or_none()
-    
+
     async def get_actual_workout_plan_by_user_id(
         self, user_id: int
     ) -> WorkoutPlans | None:
         result = await self._session.execute(
-            select(WorkoutPlans).join(UserTraining).where(
+            select(WorkoutPlans)
+            .join(UserTraining)
+            .where(
                 UserTraining.user_id == user_id,
-                UserTraining.is_actual == True,
-                UserTraining.is_completed == False,
+                UserTraining.is_actual,
+                not UserTraining.is_completed,
                 UserTraining.workout_plan_id == WorkoutPlans.id,
             )
         )
@@ -334,15 +343,16 @@ class WorkoutPlanQuerys:
         )
         return result.scalar() if result else 0
 
-
     async def get_actual_workout_plan_previous(
         self, user_id: int
-    ) -> tuple[int, datetime, datetime]| None:
+    ) -> tuple[int, datetime, datetime] | None:
         result = await self._session.execute(
-            select(WorkoutPlans.id, UserTraining.start_date, UserTraining.end_date).join(UserTraining).where(
+            select(WorkoutPlans.id, UserTraining.start_date, UserTraining.end_date)
+            .join(UserTraining)
+            .where(
                 UserTraining.user_id == user_id,
-                UserTraining.is_actual == True,
-                UserTraining.is_completed == False,
+                UserTraining.is_actual,
+                not UserTraining.is_completed,
                 UserTraining.workout_plan_id == WorkoutPlans.id,
             )
         )

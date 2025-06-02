@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependency.auth import AuthManager
@@ -9,6 +9,8 @@ from app.routers.controller.user import UserController
 from app.schemas.user import (
     ClientInfo,
     CreateUser,
+    CreateUserPostSuggestion,
+    CreateUserPublication,
     RankingPoints,
     UpdateUser,
     UserDetail,
@@ -88,6 +90,37 @@ async def get_user_detail_by_cpf(
     return await UserController(session, user).get_user_detail_by_cpf(cpf)
 
 
+@router_user.get("/ranking-points")
+async def get_ranking_points(
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[list[RankingPoints]]:
+    return await UserController(session, user).get_ranking_points()
+
+
+@router_user.post("/user-publication-progress")
+async def create_user_publication(
+    form_data: CreateUserPublication = Depends(),
+    image_files: list[UploadFile] = File(default_factory=list),
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[None]:
+    return await UserController(session, user).create_publication_progress(
+        form_data, image_files
+    )
+
+
+@router_user.post("/user-publication-suggestion")
+async def create_user_publication_suggestion(
+    form_data: CreateUserPostSuggestion = Depends(),
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[None]:
+    return await UserController(session, user).create_publication_tips_suggestions(
+        form_data
+    )
+
+
 @router_user.delete("/{user_id}")
 async def delete_relations(
     user_id: int,
@@ -95,11 +128,3 @@ async def delete_relations(
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
     return await UserController(session, user).delete_relation(user_id)
-
-
-@router_user.get("/ranking-points")
-async def get_ranking_points(
-    session: AsyncSession = Depends(SessionConnection.session),
-    user: UserInfo = Depends(AuthManager.has_authorization),
-) -> BasicResponse[RankingPoints]:
-    return await UserController(session, user).get_ranking_points()

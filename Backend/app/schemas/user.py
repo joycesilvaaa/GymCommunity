@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, field_validator
 
-from app.core.user_profile import UserProfile
+from app.core.user_profile import UserPost, UserProfile
 
 
 class UserLogin(BaseModel):
@@ -66,3 +66,30 @@ class RankingPoints(BaseModel):
     id: int
     name: str
     points: int
+
+
+class CreateUserPublication(BaseModel):
+    content: str
+    is_private: bool = False
+    type_post: UserPost = UserPost.PROGRESS.value
+
+
+class CreateUserPostSuggestion(BaseModel):
+    content: str
+    is_private: bool = False
+    type_post: UserPost = UserPost.TIPS_SUGGESTIONS.value
+
+
+class UpdateUserPublication(BaseModel):
+    content: str | None = None
+    image_urls: list[str] | None = None
+    is_private: bool | None = None
+
+
+class UserPublication(BaseModel):
+    id: int
+    user_id: int
+    content: str
+    image_urls: list[str] | None = None
+    is_private: bool = False
+    created_at: datetime

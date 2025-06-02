@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text, update
 
-from app.core.db_model import User, UserPoints, UserRelations
+from app.core.db_model import User, UserPoints, UserPost, UserRelations
 from app.schemas.user import (
     ClientInfo,
     CreateUser,
+    CreateUserPostSuggestion,
+    CreateUserPublication,
     RankingPoints,
     UpdateUser,
     UserDetail,
     UserInfo,
     UserLogin,
 )
+from app.service.utils import ImageSaver
 
 
 class UserService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+        self._image_saver = ImageSaver()
 
     async def get_user_by_cpf(self, cpf: str) -> UserInfo | None:
         query = text(
@@ -194,3 +198,34 @@ class UserService:
         result: CursorResult = await self._session.execute(query)
         ranking = result.fetchall()
         return [RankingPoints(**user._asdict()) for user in ranking]
+
+    async def create_user_publication(
+        self,
+        user_id: int,
+        publication: CreateUserPublication,
+        imagens: list[UploadFile],
+    ) -> None:
+        image_urls = []
+        if len(imagens):
+            for image in imagens:
+                image_url = await self._image_saver.save_image(image)
+                image_urls.append(image_url)
+        user_publication = UserPost(
+            **publication.model_dump(exclude={"image_files"}),
+            user_id=user_id,
+            image_urls=image_urls,
+        )
+        self._session.add(user_publication)
+        await self._session.flush()
+        await self._session.commit()
+
+    async def create_user_publication_suggestions(
+        self, user_id: int, publication: CreateUserPostSuggestion
+    ) -> None:
+        user_publication = UserPost(
+            **publication.model_dump(exclude={"image_files"}),
+            user_id=user_id,
+        )
+        self._session.add(user_publication)
+        await self._session.flush()
+        await self._session.commit()

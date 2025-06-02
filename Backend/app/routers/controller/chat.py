@@ -1,10 +1,16 @@
 # coding: utf-8
 
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.basic_response import BasicResponse
-from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat,ChatOtherUserName
+from app.schemas.chat import (
+    ChatId,
+    ChatMessages,
+    ChatOtherUserName,
+    Chats,
+    SendMessage,
+    SugestionChat,
+)
 from app.schemas.user import UserInfo
 from app.service.chat import ChatService
 
@@ -27,7 +33,7 @@ class ChatController:
     async def create_message(self, send_message: SendMessage) -> BasicResponse[None]:
         try:
             await self._service.create_message(self._user.id, send_message)
-            return  BasicResponse(data=None)
+            return BasicResponse(data=None)
         except Exception as e:
             raise e
 
@@ -62,10 +68,14 @@ class ChatController:
             )
         except Exception as e:
             raise e
-        
-    async def get_other_user_name(self, chat_id: int) -> BasicResponse[ChatOtherUserName]:
+
+    async def get_other_user_name(
+        self, chat_id: int
+    ) -> BasicResponse[ChatOtherUserName]:
         try:
-            other_user_name = await self._service.get_name_other_user(self._user.id, chat_id)
+            other_user_name = await self._service.get_name_other_user(
+                self._user.id, chat_id
+            )
             return BasicResponse(
                 data=other_user_name,
             )

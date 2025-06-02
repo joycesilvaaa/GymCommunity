@@ -7,10 +7,18 @@ from app.dependency.auth import AuthManager
 from app.dependency.database import SessionConnection
 from app.modules.basic_response import BasicResponse
 from app.routers.controller.chat import ChatController
-from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat,ChatOtherUserName
+from app.schemas.chat import (
+    ChatId,
+    ChatMessages,
+    ChatOtherUserName,
+    Chats,
+    SendMessage,
+    SugestionChat,
+)
 from app.schemas.user import UserInfo
 
 router_chat = APIRouter(prefix="/chat", tags=["chat"])
+
 
 @router_chat.get("/sugestions")
 async def get_sugestion_chat(
@@ -54,6 +62,7 @@ async def create_chat(
 ) -> BasicResponse[ChatId]:
     return await ChatController(session, user).create_chat(other_user_id)
 
+
 @router_chat.get("/{chat_id}")
 async def get_all_chats(
     chat_id: int,
@@ -61,6 +70,7 @@ async def get_all_chats(
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[list[ChatMessages]]:
     return await ChatController(session, user).get_all_messages(chat_id)
+
 
 @router_chat.get("/other-user-name/{chat_id}")
 async def get_other_user_name(

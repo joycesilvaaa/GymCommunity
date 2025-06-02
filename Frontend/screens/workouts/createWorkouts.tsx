@@ -21,6 +21,7 @@ import { CreateTraining, WorkoutPlan, Exercise } from '@/interfaces/workout_plan
 import routes from '@/api/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect } from 'react';
+import { useAuth } from '@/hooks/auth';
 
 export default function CreateTrainingScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
@@ -40,14 +41,18 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
   const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const toast = useToast();
+  const context = useAuth();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
-  const { id } = route.params || { id: null };
+  const id =
+    (route.params && route.params.id) ||
+    (lastScreen === 'Home' && context.user?.id) ||
+    null;
   const [timeToWorkout, setTimeToWorkout] = useState<string>('');
 
   useEffect(() => {
-    if (lastScreen === 'UserProfile') {
+    if (lastScreen === 'UserProfile' || lastScreen === 'Home') {
       setIsPublic(false);
     }
   }, [lastScreen]);
@@ -118,7 +123,7 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
       plans,
       months_valid: Number(monthsValid),
     };
-    if (lastScreen === 'UserProfile') {
+    if (lastScreen === 'UserProfile'|| lastScreen === 'Home') {
       if (!startDate) {
         Alert.alert('Erro', 'Selecione uma data de início válida');
         return;
@@ -255,8 +260,8 @@ export default function CreateTrainingScreen({ navigation, route }: NavigationPr
               <HStack alignItems="center" justifyContent="space-between">
                 <Text color="coolGray.600">Público</Text>
                 <Switch
-                  isChecked={lastScreen === 'UserProfile' ? false : isPublic}
-                  isDisabled={lastScreen === 'UserProfile'}
+                  isChecked={lastScreen === 'UserProfile'|| lastScreen === 'Home' ? false : isPublic}
+                  isDisabled={lastScreen === 'UserProfile'|| lastScreen === 'Home'}
                   onToggle={() => setIsPublic(!isPublic)}
                   colorScheme="indigo"
                 />

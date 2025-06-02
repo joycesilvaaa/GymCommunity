@@ -8,9 +8,11 @@ import { CreateDiet, Meal, OptionType } from '@/interfaces/diet';
 import { NavigationProps } from '@/interfaces/navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect } from 'react';
+import { useAuth } from '@/hooks/auth';
 
 export default function CreateDietScreen({ navigation, route }: NavigationProps) {
   const { colors } = useTheme();
+  const context = useAuth();
   const [nameDiet, setNameDiet] = useState('');
   const [dietDate, setDietDate] = useState('');
   const [mealType, setMealType] = useState('');
@@ -24,9 +26,13 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(true);
   const lastScreen = navigation.getState().routes[navigation.getState().index - 1].name;
-  const { id } = route.params || { id: null };
+  const id =
+    (route.params && route.params.id) ||
+    (lastScreen === 'Home' && context.user?.id) ||
+    null;
+
   useEffect(() => {
-    if (lastScreen === 'UserProfile') {
+    if (lastScreen === 'UserProfile'|| lastScreen === 'Home') {
       setIsPublic(false);
     }
   }, [lastScreen]);
@@ -103,7 +109,7 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
       Alert.alert('Erro', 'O período deve ser um número positivo.');
       return;
     }
-    if (lastScreen === 'UserProfile' && (!startDate || (startDate ?? new Date()) < new Date())) {
+    if (lastScreen === 'UserProfile' || lastScreen === 'Home' && (!startDate || (startDate ?? new Date()) < new Date())) {
       3;
       Alert.alert('Erro', 'A data de início é obrigatória e deve ser futura ou igual a hoje.');
       return;
@@ -125,7 +131,7 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
       months_valid: monthsValid,
     };
 
-    if (lastScreen === 'UserProfile') {
+    if (lastScreen === 'UserProfile'|| lastScreen === 'Home') {
       newDiet.start_date = startDate
         ? startDate.toISOString().replace('Z', '')
         : new Date().toISOString().replace('Z', '');
@@ -234,8 +240,8 @@ export default function CreateDietScreen({ navigation, route }: NavigationProps)
               <Switch
                 size="sm"
                 onTrackColor="indigo.400"
-                isChecked={lastScreen === 'UserProfile' ? false : isPublic}
-                isDisabled={lastScreen === 'UserProfile'}
+                isChecked={lastScreen === 'UserProfile' || lastScreen === 'Home' ? false : isPublic}
+                isDisabled={lastScreen === 'UserProfile'|| lastScreen === 'Home'}
                 onToggle={() => setIsPublic(!isPublic)}
               />
             </HStack>

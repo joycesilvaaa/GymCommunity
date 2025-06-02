@@ -4,7 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text
 
 from app.core.db_model import Chat, ChatMessage, Participant
-from app.schemas.chat import ChatId, ChatMessages, Chats, SendMessage, SugestionChat, ChatOtherUserName
+from app.schemas.chat import (
+    ChatId,
+    ChatMessages,
+    ChatOtherUserName,
+    Chats,
+    SendMessage,
+    SugestionChat,
+)
 
 
 class ChatService:
@@ -30,7 +37,7 @@ class ChatService:
             JOIN users u_sender ON u_sender.id = cm.user_id
             JOIN participants p ON p.chat_id = c.id
             JOIN users u_other ON u_other.id = p.user_id
-            WHERE 
+            WHERE
                 c.id = :chat_id
                 AND EXISTS (
                     SELECT 1
@@ -42,10 +49,12 @@ class ChatService:
                 AND EXISTS (
                     SELECT 1
                     FROM user_relations ur
-                    WHERE 
-                        (ur.user_id = :current_user_id AND ur.professional_id = u_other.id)
-                        OR 
-                        (ur.professional_id = :current_user_id AND ur.user_id = u_other.id)
+                    WHERE
+                        (ur.user_id = :current_user_id
+                        AND ur.professional_id = u_other.id)
+                        OR
+                        (ur.professional_id = :current_user_id
+                        AND ur.user_id = u_other.id)
                 )
             ORDER BY cm.send_date ASC
         """
@@ -142,7 +151,7 @@ class ChatService:
 
     async def get_name_other_user(
         self, user_id: int, chat_id: int
-    ) ->ChatOtherUserName :
+    ) -> ChatOtherUserName:
         query = text(
             """
             SELECT u.name AS other_person_name

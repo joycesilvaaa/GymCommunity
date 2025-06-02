@@ -23,6 +23,31 @@ export function MenuFooter({ navigation }: NavigationProps) {
               as={
                 <MaterialCommunityIcons name={selected === 2 ? 'timeline' : 'timeline-outline'} />
               }
+              onPress={() => {
+                navigation.navigate('PublicationSuggestion');
+              }}
+              color="white"
+              size="lg"
+            />
+          </Center>
+        </Pressable>
+        <Pressable
+          opacity={selected === 1 ? 1 : 0.5}
+          py="3"
+          flex={1}
+          onPress={() => {
+            setSelected(1);
+            navigation.navigate("PublicationProgress");
+          }}
+        >
+          <Center>
+            <Icon
+              mb="1"
+              as={
+          <MaterialCommunityIcons
+            name={selected === 1 ? 'post' : 'post-outline'}
+          />
+              }
               color="white"
               size="lg"
             />

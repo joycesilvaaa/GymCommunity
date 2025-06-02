@@ -30,6 +30,9 @@ import  WorkoutScreen  from '@/screens/workouts/workoutView';
 import StartWorkoutScreen from '@/screens/workouts/startWorkout';
 import WorkoutCompleteScreen from '@/screens/workouts/completWorkout';
 import HealthGoalsScreen from '@/screens/healthGoal/healthGoal';
+import UserPoints from '@/screens/user/userPoints';
+import PublicationSuggestion from '@/screens/publication/userPublicationSuggestion';
+import PublicationProgress from '@/screens/publication/userPublicationProgress';
 const Stack = createStackNavigator();
 
 export function StackNavigator() {
@@ -146,7 +149,21 @@ export function StackNavigator() {
             component={HealthGoalsScreen}
             options={{ headerShown: false }}
           />
-          
+          <Stack.Screen
+            name="UserPoints"
+            component={UserPoints}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="PublicationSuggestion"
+            component={PublicationSuggestion}
+            options={{ headerShown: false }}    
+          />
+          <Stack.Screen
+            name="PublicationProgress"
+            component={PublicationProgress}
+            options={{ headerShown: false }}    
+          />
            
           </>
         ) : (

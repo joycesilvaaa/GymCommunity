@@ -77,18 +77,18 @@ export function Home({ navigation }: NavigationProps) {
       type: 'Dieta Atual',
       description: actualDietPrevius 
         ? `Dia inicial: ${formatedDateBr(actualDietPrevius.start_date)}\nDia final: ${formatedDateBr(actualDietPrevius.end_date)}`
-        : 'Sem dieta atual',
+        : 'Sem dieta atual. Clique para criar uma nova dieta',
       icon: <MaterialIcons name="restaurant" />,
-      screen: actualDietPrevius ? 'ViewDiet' : 'Home',
+      screen: actualDietPrevius ? 'ViewDiet' : 'CreateDiet',
       id: actualDietPrevius?.id,
     },
     {
       type: 'Treino Atual',
       description: actualWorkoutPrevius
         ? `Dia inicial: ${formatedDateBr(actualWorkoutPrevius.start_date)}\nDia final: ${formatedDateBr(actualWorkoutPrevius.end_date)}`
-        : 'Sem treino atual',
+        : 'Sem treino atual. Clique para criar um novo treino',
       icon: <MaterialIcons name="fitness-center" />,
-      screen:actualWorkoutPrevius? 'ViewWourkout': 'Home', 
+      screen:actualWorkoutPrevius? 'ViewWourkout': 'CreateWorkout', 
     },
     // {
     //   type: 'Metas',
@@ -101,6 +101,12 @@ export function Home({ navigation }: NavigationProps) {
       description: 'Visualize suas listas de compras',
       icon: <MaterialIcons name="shopping-cart" />,
       screen: 'ShoppingList',
+    },
+    {
+      type: 'Ranking de Pontos',
+      description: 'Visualize o ranking de pontos',
+      icon: <MaterialIcons name="directions-run" />,
+      screen: 'UserPoints',
     },
     {
       type: 'Dietas Gratuitas',
