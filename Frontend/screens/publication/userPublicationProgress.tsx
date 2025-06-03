@@ -1,11 +1,22 @@
-import { Layout } from "@/components/layout";
-import { NavigationProps } from "@/interfaces/navigation";
-import { Text, View, Box, Fab, Icon, Spinner, Pressable, Input, ScrollView, Image } from "native-base";
-import React, { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/auth";
-import { RenderPostProgressItem } from "@/components/card/postProgress";
-import { MaterialIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
+import { Layout } from '@/components/layout';
+import { NavigationProps } from '@/interfaces/navigation';
+import {
+  Text,
+  View,
+  Box,
+  Fab,
+  Icon,
+  Spinner,
+  Pressable,
+  Input,
+  ScrollView,
+  Image,
+} from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/auth';
+import { RenderPostProgressItem } from '@/components/card/postProgress';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 type PublicationImage = {
   url: string;
@@ -21,20 +32,22 @@ type Publication = {
   user_avatar?: string;
 };
 
-function PublicationProgress({navigation}: NavigationProps) {
-  const { user } = useAuth() as { user?: { id: number; user_profile: number; name: string; avatar_url: string } };
+function PublicationProgress({ navigation }: NavigationProps) {
+  const { user } = useAuth() as {
+    user?: { id: number; user_profile: number; name: string; avatar_url: string };
+  };
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
 
   // State para nova publicação
-  const [newContent, setNewContent] = useState("");
+  const [newContent, setNewContent] = useState('');
   const [newImages, setNewImages] = useState<string[]>([]);
 
   // Helper para selecionar imagem da galeria
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
-      alert("Permissão para acessar a galeria é necessária!");
+      alert('Permissão para acessar a galeria é necessária!');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -43,13 +56,13 @@ function PublicationProgress({navigation}: NavigationProps) {
       quality: 0.7,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setNewImages(prev => [...prev, result.assets[0].uri]);
+      setNewImages((prev) => [...prev, result.assets[0].uri]);
     }
   };
 
   // Remover imagem pelo índice
   const removeImage = (idx: number) => {
-    setNewImages(prev => prev.filter((_, i) => i !== idx));
+    setNewImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // Salvar nova publicação
@@ -57,21 +70,21 @@ function PublicationProgress({navigation}: NavigationProps) {
     if (!newContent.trim()) return;
     const newPub: Publication = {
       id: Date.now(),
-      created_at: new Date().toISOString().split("T")[0],
+      created_at: new Date().toISOString().split('T')[0],
       content: newContent,
       user_id: user?.id ?? 0,
-      user_name: user?.name ?? "Usuário",
-      user_avatar: user?.avatar_url ?? "https://randomuser.me/api/portraits/lego/1.jpg",
-      images: newImages.map(url => ({ url })),
+      user_name: user?.name ?? 'Usuário',
+      user_avatar: user?.avatar_url ?? 'https://randomuser.me/api/portraits/lego/1.jpg',
+      images: newImages.map((url) => ({ url })),
     };
-    setPublications(prev => [newPub, ...prev]);
-    setNewContent("");
+    setPublications((prev) => [newPub, ...prev]);
+    setNewContent('');
     setNewImages([]);
   };
 
   // Função para apagar publicação
   const handleDeletePublication = (id: number) => {
-    setPublications(prev => prev.filter(pub => pub.id !== id));
+    setPublications((prev) => prev.filter((pub) => pub.id !== id));
   };
 
   useEffect(() => {
@@ -81,32 +94,35 @@ function PublicationProgress({navigation}: NavigationProps) {
   function fetchPublications() {
     setTimeout(() => {
       const mockPublications: Publication[] = [
-        { 
-          id: 1, 
-          created_at: '2023-10-01', 
-          content: 'Finalmente atingi minha meta de perda de peso! Perdi 10kg em 3 meses com dieta equilibrada e treinos regulares.', 
+        {
+          id: 1,
+          created_at: '2023-10-01',
+          content:
+            'Finalmente atingi minha meta de perda de peso! Perdi 10kg em 3 meses com dieta equilibrada e treinos regulares.',
           user_id: 1,
           user_name: user?.name || 'Ana Silva',
           user_avatar: user?.avatar_url || 'https://randomuser.me/api/portraits/women/32.jpg',
-          images: [{url: 'https://picsum.photos/400/300?fitness'}]
+          images: [{ url: 'https://picsum.photos/400/300?fitness' }],
         },
-        { 
-          id: 2, 
-          created_at: '2023-10-02', 
-          content: 'Hoje completei meu primeiro triathlon! A sensação de superação é indescritível.', 
+        {
+          id: 2,
+          created_at: '2023-10-02',
+          content:
+            'Hoje completei meu primeiro triathlon! A sensação de superação é indescritível.',
           user_id: 2,
           user_name: 'Carlos Oliveira',
           user_avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-          images: [{url: 'https://picsum.photos/400/300?sports'}]
+          images: [{ url: 'https://picsum.photos/400/300?sports' }],
         },
-        { 
-          id: 3, 
-          created_at: '2023-10-03', 
-          content: 'Progresso nos músculos dorsais após 6 meses de treino focado. A consistência realmente traz resultados!', 
+        {
+          id: 3,
+          created_at: '2023-10-03',
+          content:
+            'Progresso nos músculos dorsais após 6 meses de treino focado. A consistência realmente traz resultados!',
           user_id: 3,
           user_name: user?.name || 'Mariana Costa',
           user_avatar: user?.avatar_url || 'https://randomuser.me/api/portraits/women/44.jpg',
-          images: [{url: 'https://picsum.photos/400/300?gym'}]
+          images: [{ url: 'https://picsum.photos/400/300?gym' }],
         },
       ];
       setPublications(mockPublications);
@@ -172,7 +188,7 @@ function PublicationProgress({navigation}: NavigationProps) {
                 <Box flexDirection="row" justifyContent="flex-end" mt={4}>
                   <Pressable
                     onPress={() => {
-                      setNewContent("");
+                      setNewContent('');
                       setNewImages([]);
                     }}
                     px={4}
@@ -192,7 +208,9 @@ function PublicationProgress({navigation}: NavigationProps) {
                     _pressed={{ bg: 'indigo.700' }}
                     isDisabled={!newContent.trim()}
                   >
-                    <Text color="white" fontWeight="bold">Publicar</Text>
+                    <Text color="white" fontWeight="bold">
+                      Publicar
+                    </Text>
                   </Pressable>
                 </Box>
               </Box>
@@ -209,14 +227,14 @@ function PublicationProgress({navigation}: NavigationProps) {
           ) : publications.length === 0 ? (
             <Box flex={1} justifyContent="center" alignItems="center">
               <Box bg="white" p={8} borderRadius={20} alignItems="center" shadow={1} width="100%">
-                <Icon 
-                  as={MaterialIcons} 
-                  name="add-box" 
-                  size={16} 
-                  color="coolGray.300" 
-                  mb={4}
-                />
-                <Text fontSize="lg" fontWeight="medium" color="coolGray.600" textAlign="center" mb={2}>
+                <Icon as={MaterialIcons} name="add-box" size={16} color="coolGray.300" mb={4} />
+                <Text
+                  fontSize="lg"
+                  fontWeight="medium"
+                  color="coolGray.600"
+                  textAlign="center"
+                  mb={2}
+                >
                   Nenhuma publicação encontrada
                 </Text>
                 <Text fontSize="md" color="coolGray.400" textAlign="center" mb={4}>
@@ -228,24 +246,23 @@ function PublicationProgress({navigation}: NavigationProps) {
             <Box mt={4}>
               {publications.map((publication) => (
                 <Box
-                    key={publication.id}
-                    mb={6}
-                    position="relative"
-                    bg="white"
-                    borderRadius="md"
-                    overflow="hidden"
-                    // espaço para o botão não sobrepor conteúdo
-                              >
-                              <RenderPostProgressItem
-                                item={{
-                                ...publication,
-                                handle: () => handleDeletePublication(publication.id),
-                                }}
-                                index={0}
-                                separators={{} as any}
-                              />
-                  </Box>
-
+                  key={publication.id}
+                  mb={6}
+                  position="relative"
+                  bg="white"
+                  borderRadius="md"
+                  overflow="hidden"
+                  // espaço para o botão não sobrepor conteúdo
+                >
+                  <RenderPostProgressItem
+                    item={{
+                      ...publication,
+                      handle: () => handleDeletePublication(publication.id),
+                    }}
+                    index={0}
+                    separators={{} as any}
+                  />
+                </Box>
               ))}
             </Box>
           )}

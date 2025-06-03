@@ -33,6 +33,7 @@ import HealthGoalsScreen from '@/screens/healthGoal/healthGoal';
 import UserPoints from '@/screens/user/userPoints';
 import PublicationSuggestion from '@/screens/publication/userPublicationSuggestion';
 import PublicationProgress from '@/screens/publication/userPublicationProgress';
+import UserCalendar from '@/screens/user/userCalendar';
 const Stack = createStackNavigator();
 
 export function StackNavigator() {
@@ -164,11 +165,16 @@ export function StackNavigator() {
             component={PublicationProgress}
             options={{ headerShown: false }}    
           />
+          <Stack.Screen
+            name="MyCalendar"
+            component={UserCalendar}
+            options={{ headerShown: false }}    
+          />
            
           </>
         ) : (
           <>
-            <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
+            {/* <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
             <Stack.Screen
               name="CreateUser"
@@ -180,7 +186,12 @@ export function StackNavigator() {
               component={CreateProfissional}
               options={{ headerShown: false }}
             />
-             
+              */}
+                        <Stack.Screen
+            name="MyCalendar"
+            component={UserCalendar}
+            options={{ headerShown: false }}    
+          />
            
           </>
         )}
