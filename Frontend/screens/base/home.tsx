@@ -90,12 +90,18 @@ export function Home({ navigation }: NavigationProps) {
       icon: <MaterialIcons name="fitness-center" />,
       screen:actualWorkoutPrevius? 'ViewWourkout': 'CreateWorkout', 
     },
-    // {
-    //   type: 'Metas',
-    //   description: 'Visualize suas metas',
-    //   icon: <MaterialIcons name="flag" />,
-    //   screen: 'HealthGoals',
-    // },
+    {
+      type: 'Meu Calendario',
+      description:"Visualize seu calendário de treinos e dietas",
+      icon: <MaterialIcons name="fitness-center" />,
+      screen:"MyCalendar", 
+    },
+    {
+      type: 'Metas',
+      description: 'Visualize suas metas',
+      icon: <MaterialIcons name="flag" />,
+      screen: 'HealthGoals',
+    },
     {
       type: 'Lista de Compras',
       description: 'Visualize suas listas de compras',
@@ -120,6 +126,12 @@ export function Home({ navigation }: NavigationProps) {
       icon: <MaterialIcons name="directions-run" />,
       screen: quantityFreeWorkout > 0 ? 'AllFreeWorkout' : 'Home',
     },
+    {
+      type: 'Dicas',
+      description: 'Visualize dicas de treinos e dietas',
+      icon: <MaterialIcons name="directions-run" />,
+      screen: "PublicationSuggestion", 
+    }
   ];
 
   const cardDataNutricionista = [
@@ -147,6 +159,12 @@ export function Home({ navigation }: NavigationProps) {
       icon: <MaterialIcons name="note-add" />,
       screen: 'ManagerMyFreeDiets',
     },
+    {
+      type: 'Dicas',
+      description: 'Visualize dicas de treinos e dietas e compartilhe com seus alunos',
+      icon: <MaterialIcons name="directions-run" />,
+      screen: "PublicationSuggestion", 
+    }
   ];
 
   const cardDataPersonal = [
@@ -174,6 +192,12 @@ export function Home({ navigation }: NavigationProps) {
       icon: <MaterialIcons name="add" />,
       screen: 'ManagerMyFreeTraining',
     },
+    {
+      type: 'Dicas',
+      description: 'Visualize dicas de treinos e dietas e compartilhe com seus alunos',
+      icon: <MaterialIcons name="directions-run" />,
+      screen: "PublicationSuggestion", 
+    }
   ];
 
   if (isLoading) {

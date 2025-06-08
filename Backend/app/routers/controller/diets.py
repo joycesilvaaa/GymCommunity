@@ -13,6 +13,7 @@ from app.schemas.diet import (
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
+    DietPeriodCalendar,
 )
 from app.schemas.user import UserInfo
 from app.service.diets import DietService
@@ -27,8 +28,6 @@ class DietController:
         try:
             diet = await self._service.get_diet_actual(user_id)
             return BasicResponse(data=diet)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -38,8 +37,6 @@ class DietController:
         try:
             diet = await self._service.get_diet_actual_previous(user_id)
             return BasicResponse(data=diet)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -47,8 +44,6 @@ class DietController:
         try:
             diet = await self._service.get_diet_by_id(diet_id)
             return BasicResponse(data=diet)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -57,8 +52,6 @@ class DietController:
             quantity = await self._service.get_quantity_of_free_diets()
             print(quantity)
             return BasicResponse(data=quantity)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -68,8 +61,6 @@ class DietController:
         try:
             expiring_diets = await self._service.get_all_expiring_diets(user.id)
             return BasicResponse(data=expiring_diets)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -79,8 +70,6 @@ class DietController:
         try:
             finished_diets = await self._service.get_all_finished_diets(user.id)
             return BasicResponse(data=finished_diets)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -90,8 +79,6 @@ class DietController:
         try:
             last_finished_diet = await self._service.get_name_last_diet(user.id)
             return BasicResponse(data=last_finished_diet)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -101,8 +88,6 @@ class DietController:
         try:
             await self._service.create_diet(diet, user.id)
             return BasicResponse()
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -112,8 +97,6 @@ class DietController:
         try:
             await self._service.update_diet(diet_id, diet)
             return BasicResponse()
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -121,8 +104,6 @@ class DietController:
         try:
             await self._service.delete_diet(diet_id)
             return BasicResponse()
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -132,8 +113,6 @@ class DietController:
         try:
             diets = await self._service.get_diets_by_professional(user.id)
             return BasicResponse(data=diets)
-        except HTTPException as e:
-            raise e
         except Exception as e:
             raise e
 
@@ -141,7 +120,14 @@ class DietController:
         try:
             diets = await self._service.get_all_free_diets()
             return BasicResponse(data=diets)
-        except HTTPException as e:
+        except Exception as e:
             raise e
+
+    async def get_period_diet(
+        self, user: UserInfo
+    ) -> BasicResponse[DietPeriodCalendar | None]:
+        try:
+            diet = await self._service.get_period_diet_by_user(user.id)
+            return BasicResponse(data=diet)
         except Exception as e:
             raise e

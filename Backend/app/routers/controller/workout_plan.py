@@ -14,6 +14,7 @@ from app.schemas.workout_plans import (
     UpdateWorkoutPlan,
     WorkoutPlan,
     WorkoutPlanData,
+    WorkoutPlanCalendar
 )
 from app.service.workout_plans import WorkoutPlanService
 
@@ -182,10 +183,14 @@ class WorkoutPlanController:
     async def delete_workout_plan(self, workout_plan_id: int) -> BasicResponse[None]:
         try:
             await self._service.delete_workout_plan(workout_plan_id)
-            return BasicResponse()
-        except HTTPException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
             )
+        
+    async def get_period_workout_plan(self, user: UserInfo) -> BasicResponse[WorkoutPlanCalendar | None]:
+        try:
+            workout_plan = await self._service.get_period_workout_plan(user.id)
+            return BasicResponse(data=workout_plan)
+        except Exception as e:
+            raise e

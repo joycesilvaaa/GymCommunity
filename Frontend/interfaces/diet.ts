@@ -52,3 +52,10 @@ export interface IExpiringDiet{
   user_id: number;
   diet_id: number;
 }
+
+export interface DietSchedule{
+  id: number
+  start_date: Date;
+  end_date: Date;
+  time_to_eat: string[];
+}

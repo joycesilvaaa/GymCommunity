@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db_model import HealthGold
 from app.modules.basic_response import BasicResponse
-from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold
+from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold,HealthGoldSchema
 from app.schemas.user import UserInfo
 from app.service.healthGold import HealthGoldService
 
@@ -12,7 +12,7 @@ from app.service.healthGold import HealthGoldService
 class HealthGoldController:
     def __init__(self, session: AsyncSession, user: UserInfo) -> None:
         self._session = session
-        self._user = UserInfo
+        self._user = user
         self._querys = HealthGoldService(session, self._user)
 
     async def create_health_gold(
@@ -46,20 +46,20 @@ class HealthGoldController:
         except HTTPException as e:
             raise e
 
-    async def get_health_gold_by_user(self) -> BasicResponse[list[HealthGold]]:
+    async def get_health_gold_by_user(self) -> BasicResponse[list[HealthGoldSchema]]:
         try:
             health_gold = await HealthGoldService(
                 self._session, self._user
             ).get_health_gold_by_user()
-            return BasicResponse[health_gold]()
+            return BasicResponse[list[HealthGoldSchema]](data=health_gold)
         except HTTPException as e:
             raise e
 
-    async def get_health_gold_by_id(self, gold_id: int) -> BasicResponse[HealthGold]:
+    async def get_health_gold_by_id(self, gold_id: int) -> BasicResponse[HealthGoldSchema | None]:
         try:
             health_gold = await HealthGoldService(
                 self._session, self._user
             ).get_health_gold_by_id(gold_id)
-            return BasicResponse[health_gold]()
+            return BasicResponse[health_gold| None](data=health_gold)
         except HTTPException as e:
             raise e

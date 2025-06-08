@@ -12,7 +12,8 @@ import {
   useToast,
   ZStack,
   Center,
-  Fade
+  Fade,
+  Icon
 } from 'native-base';
 import { ListRenderItemInfo, Platform, Share, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -122,6 +123,66 @@ export function RenderPostProgressItem({ item }: ListRenderItemInfo<Publication>
     }
   };
 
+  // Componente para renderizar cada imagem da galeria com seu próprio estado
+  const GalleryImage = ({ imageUrl }: { imageUrl: string }) => {
+    const [imageError, setImageError] = useState(false);
+
+    if (!imageUrl) {
+      return (
+        <Center
+          width={280}
+          height={200}
+          bg="coolGray.100"
+          borderRadius="xl"
+          borderWidth={1}
+          borderColor="coolGray.200"
+          m={1}
+        >
+          <Text color="coolGray.500" fontSize="sm" textAlign="center">
+            Não é possível visualizar esta imagem.
+          </Text>
+        </Center>
+      );
+    }
+    
+    return (
+      <Pressable m={1} borderRadius="xl" overflow="hidden">
+        {imageError ? (
+          <Center
+            width={280}
+            height={200}
+            bg="coolGray.100"
+            borderRadius="xl"
+            borderWidth={1}
+            borderColor="coolGray.200"
+          >
+            <Icon as={Ionicons} name="image-outline" size={8} color="coolGray.400" mb={2} />
+            <Text color="coolGray.500" fontSize="sm" textAlign="center">
+              Não foi possível carregar a imagem.
+            </Text>
+            <Text color="coolGray.400" fontSize="xs" textAlign="center" mt={1}>
+              Verifique sua conexão com a internet.
+            </Text>
+          </Center>
+        ) : (
+          <Image
+            source={{ uri: imageUrl }}
+            alt="Publication Image"
+            width={280}
+            height={200}
+            resizeMode="cover"
+            fallbackSource={{ 
+              uri: 'https://via.placeholder.com/280x200?text=Imagem+não+disponível' 
+            }}
+            borderWidth={1}
+            borderColor="coolGray.200"
+            onError={() => setImageError(true)}
+          />
+        )}
+      </Pressable>
+    );
+  };
+
   return (
     <Box 
       borderRadius="2xl" 
@@ -201,24 +262,22 @@ export function RenderPostProgressItem({ item }: ListRenderItemInfo<Publication>
       
       {/* Galeria de imagens */}
       {item.images && item.images.length > 0 && (
-        <FlatList
-          data={item.images}
-          keyExtractor={(image) => image.url}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          p={1}
-          renderItem={({ item: image }) => (
-            <Pressable m={1} borderRadius="xl" overflow="hidden">
-              <Image
-                source={{ uri: image.url }}
-                alt="Publication Image"
-                width={280}
-                height={200}
-                resizeMode="cover"
-              />
-            </Pressable>
-          )}
-        />
+        <Box>
+          <FlatList
+            data={item.images}
+            keyExtractor={(image, index) => `image-${index}-${image.url}`}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            p={1}
+            renderItem={({ item: image }) => {
+              // Garantir URL absoluta
+              const absoluteUrl = image.url.startsWith('http')
+                ? image.url
+                : `https://seu-dominio.com/${image.url.replace(/^\/+/, '').replace(/\\/g, '/')}`;
+              return <GalleryImage imageUrl={absoluteUrl} />;
+            }}
+          />
+        </Box>
       )}
     </Box>
   );

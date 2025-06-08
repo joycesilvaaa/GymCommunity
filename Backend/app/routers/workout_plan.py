@@ -17,6 +17,7 @@ from app.schemas.workout_plans import (
     UpdateWorkoutPlan,
     WorkoutPlan,
     WorkoutPlanData,
+    WorkoutPlanCalendar
 )
 
 router_workout_plan = APIRouter(tags=["workout_plans"], prefix="/workout-plans")
@@ -100,6 +101,14 @@ async def get_workout_plan_actual_previous(
     return await WorkoutPlanController(session).get_workout_plan_actual_previous(
         user
     )
+
+@router_workout_plan.get("/period")
+async def get_period_workout_plan(
+    user: UserInfo = Depends(AuthManager.has_authorization),
+    session: AsyncSession = Depends(SessionConnection.session),
+)-> BasicResponse[WorkoutPlanCalendar| None]:
+    return await WorkoutPlanController(session).get_period_workout_plan(user)
+
 
 
 @router_workout_plan.patch("/finish-daily-workout/{daily_training}")

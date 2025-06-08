@@ -10,10 +10,10 @@ export interface HealthGoal {
   }
 
   export interface HealthGoalFormData {
-    goal_type: string;
-    start_weight: number;
-    goal_weight: number;
-    end_weight: number;
-    start_date: Date;
-    end_date: Date;
+  goal_type: string;
+  start_weight: number;
+  goal_weight: number;
+  end_weight: number;
+  start_date: Date;
+  end_date: Date;
   }

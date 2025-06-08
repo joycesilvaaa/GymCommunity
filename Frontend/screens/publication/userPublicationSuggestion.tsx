@@ -4,23 +4,22 @@ import { Text, View, Input, Pressable, Box, ScrollView, Spinner } from 'native-b
 import React, { useEffect, useState } from 'react';
 import { RenderPostSuggestionItem } from '@/components/card/postSuggestion';
 import { useAuth } from '@/hooks/auth';
-
+import routes from '@/api/api';
 
 type Publication = {
   id: number;
-  created_at: string;
-  content: string;
   user_id: number;
+  create_date: string;
+  content: string;
   user_name?: string;
-  user_avatar?: string;
 };
 
 function PublicationSuggestion({ navigation }: NavigationProps) {
-  const { user } = useAuth() as { user?: { id: number; user_profile: number; name: string; avatar_url: string } };
+  const { user } = useAuth() as {
+    user?: { id: number; user_profile: number; name: string; avatar_url: string };
+  };
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estados para nova sugestão
   const [newSuggestionContent, setNewSuggestionContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,67 +27,46 @@ function PublicationSuggestion({ navigation }: NavigationProps) {
     fetchPublications();
   }, []);
 
-  function fetchPublications() {
-    // Simulate fetching publications
+  async function fetchPublications() {
     setLoading(true);
-    setTimeout(() => {
-      const mockPublications: Publication[] = [
-        { 
-          id: 1, 
-          created_at: '2023-10-01', 
-          content: 'Tente incluir pelo menos 30 minutos de atividade física moderada em seu dia a dia. Caminhadas, natação ou ciclismo são ótimas opções para começar.', 
-          user_id: 1,
-          user_name: 'Dr. Ricardo Almeida',
-          user_avatar: 'https://randomuser.me/api/portraits/men/45.jpg'
-        },
-        { 
-          id: 2, 
-          created_at: '2023-10-02', 
-          content: 'Mantenha-se hidratado! Beba pelo menos 2 litros de água por dia. A hidratação adequada melhora o desempenho físico e contribui para a saúde geral.', 
-          user_id: 2,
-          user_name: 'Nutricionista Ana Paula',
-          user_avatar: 'https://randomuser.me/api/portraits/women/28.jpg'
-        },
-      ];
-      setPublications(mockPublications);
+    const response = await routes.getUserPublicationSuggestion();
+    console.log('Response from getUserPublicationSuggestion:', response);
+    if (response.status === 200) {
+      const data = response.data.data as Publication[];
+      setPublications(data);
       setLoading(false);
-    }, 1000);
+    }
   }
-    // Função para apagar publicação
-  const handleDeletePublication = (id: number) => {
+
+  const handleDeletePublication = async (id: number) => {
+    
+    const response = await routes.deletePublicationSuggestion(id);
     setPublications((prev) => prev.filter((pub) => pub.id !== id));
   };
 
-  // Função para adicionar nova sugestão
-  const handleAddSuggestion = () => {
+  const handleAddSuggestion = async () => {
     if (!newSuggestionContent.trim()) return;
-    
+
     setIsSubmitting(true);
-    
-    // Simulando o envio para uma API
-    setTimeout(() => {
-      const newSuggestion: Publication = {
-        id: Date.now(),
-        created_at: new Date().toISOString().split('T')[0],
-        content: newSuggestionContent,
-        user_id: user?.id || 0,
-        user_name: user?.name || 'Usuário',
-        user_avatar: user?.avatar_url || 'https://randomuser.me/api/portraits/lego/1.jpg'
+    try {
+      const data = {
+        content: newSuggestionContent
       };
-      
-      // Adicionar a nova sugestão no início da lista
-      setPublications(prev => [newSuggestion, ...prev]);
-      
-      // Limpar o formulário
-      setNewSuggestionContent('');
+
+
+      const response = await routes.createPublicationSuggestion(data);
+
+      if (response.status === 200) {
+        await fetchPublications();
+        setNewSuggestionContent('');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar sugestão:', error);
+
+      alert('Erro de conexão. Verifique sua internet e tente novamente.');
+    } finally {
       setIsSubmitting(false);
-      
-      // Feedback visual
-      alert('Sugestão adicionada com sucesso!');
-      
-      // Recarregar a lista
-      fetchPublications();
-    }, 800);
+    }
   };
 
   return (
@@ -98,8 +76,7 @@ function PublicationSuggestion({ navigation }: NavigationProps) {
           <Text fontSize="2xl" fontWeight="bold" mb={4} textAlign="center" color="indigo.600">
             Dicas e sugestões para uma vida mais saudável
           </Text>
-          
-          {/* Formulário para adicionar sugestões diretamente na página */}
+
           {(user?.user_profile === 2 || user?.user_profile === 3) && (
             <Box bg="white" p={4} borderRadius="md" shadow={1} mb={6}>
               <Text fontSize="md" fontWeight="bold" mb={2}>
@@ -121,7 +98,7 @@ function PublicationSuggestion({ navigation }: NavigationProps) {
                 <Pressable
                   onPress={handleAddSuggestion}
                   bg="indigo.600"
-                  _pressed={{ bg: "indigo.700" }}
+                  _pressed={{ bg: 'indigo.700' }}
                   px={4}
                   py={2}
                   borderRadius={8}

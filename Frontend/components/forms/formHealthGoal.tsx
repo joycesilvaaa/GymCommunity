@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
-import { Button, FormControl, Input, Select, VStack } from 'native-base';
+import {
+  Button,
+  FormControl,
+  Input,
+  Select,
+  VStack,
+  Box,
+  Heading,
+  Text,
+  HStack,
+  Icon,
+} from 'native-base';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { HealthGoalFormData } from '@/interfaces/healthGoal';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface HealthGoalFormProps {
   initialData?: HealthGoalFormData;
@@ -34,80 +46,130 @@ function HealthGoalForm({ initialData, onSubmit }: HealthGoalFormProps) {
   };
 
   return (
-    <VStack space={4} p={4}>
-      <FormControl>
-        <FormControl.Label>Tipo de Meta</FormControl.Label>
-        <Select
-          selectedValue={formData.goal_type}
-          onValueChange={(value) => setFormData((prev) => ({ ...prev, goal_type: value }))}
+    <Box bg="white" borderRadius="lg" shadow={2} p={6} mx={2} my={4} alignItems="center">
+      <Heading mb={4} color="indigo.600" size="md">
+        Nova Meta de Saúde
+      </Heading>
+      <VStack space={5} w="100%">
+        <FormControl>
+          <FormControl.Label>Tipo de Meta</FormControl.Label>
+          <Select
+            selectedValue={formData.goal_type}
+            onValueChange={(value) => setFormData((prev) => ({ ...prev, goal_type: value }))}
+            borderRadius="md"
+            bg="gray.100"
+            _selectedItem={{
+              bg: 'primary.100',
+              endIcon: <Icon as={MaterialIcons} name="check" size={5} />,
+            }}
+          >
+            <Select.Item label="Perda de Peso" value="Perda de Peso" />
+            <Select.Item label="Ganho de Massa" value="Ganho de Massa" />
+            <Select.Item label="Manutenção" value="Manutenção" />
+          </Select>
+        </FormControl>
+
+        <HStack space={3}>
+          <FormControl flex={1}>
+            <FormControl.Label>Peso Inicial (kg)</FormControl.Label>
+            <Input
+              keyboardType="numeric"
+              value={formData.start_weight.toString()}
+              onChangeText={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  start_weight: Number(value) || 0,
+                }))
+              }
+              borderRadius="md"
+              bg="gray.100"
+            />
+          </FormControl>
+          <FormControl flex={1}>
+            <FormControl.Label>Peso Atual (kg)</FormControl.Label>
+            <Input
+              keyboardType="numeric"
+              value={formData.goal_weight.toString()}
+              onChangeText={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  goal_weight: Number(value) || 0,
+                }))
+              }
+              borderRadius="md"
+              bg="gray.100"
+            />
+          </FormControl>
+        </HStack>
+
+        <FormControl>
+          <FormControl.Label>Peso Desejado (kg)</FormControl.Label>
+          <Input
+            keyboardType="numeric"
+            value={formData.end_weight.toString()}
+            onChangeText={(value) =>
+              setFormData((prev) => ({
+                ...prev,
+                end_weight: Number(value) || 0,
+              }))
+            }
+            borderRadius="md"
+            bg="gray.100"
+          />
+        </FormControl>
+
+        <HStack space={3}>
+          <FormControl flex={1}>
+            <FormControl.Label>Data de Início</FormControl.Label>
+            <Button
+              variant="outline"
+              colorScheme="primary"
+              leftIcon={<Icon as={MaterialIcons} name="calendar-today" size={5} />}
+              onPress={() => setShowDatePicker((prev) => ({ ...prev, start: true }))}
+            >
+              <Text color="primary.700">{formData.start_date.toLocaleDateString()}</Text>
+            </Button>
+            {showDatePicker.start && (
+              <DateTimePicker
+                value={formData.start_date}
+                mode="date"
+                onChange={handleDateChange('start')}
+              />
+            )}
+          </FormControl>
+
+          <FormControl flex={1}>
+            <FormControl.Label>Data Final Prevista</FormControl.Label>
+            <Button
+              variant="outline"
+              colorScheme="secondary"
+              leftIcon={<Icon as={MaterialIcons} name="event" size={5} />}
+              onPress={() => setShowDatePicker((prev) => ({ ...prev, end: true }))}
+            >
+              <Text color="secondary.700">{formData.end_date.toLocaleDateString()}</Text>
+            </Button>
+            {showDatePicker.end && (
+              <DateTimePicker
+                value={formData.end_date}
+                mode="date"
+                minimumDate={formData.start_date}
+                onChange={handleDateChange('end')}
+              />
+            )}
+          </FormControl>
+        </HStack>
+
+        <Button
+          mt={4}
+          colorScheme="indigo"
+          borderRadius="full"
+          leftIcon={<Icon as={MaterialIcons} name="check-circle" size={6} />}
+          onPress={handleSubmit}
         >
-          <Select.Item label="Perda de Peso" value="Perda de Peso" />
-          <Select.Item label="Ganho de Massa" value="Ganho de Massa" />
-          <Select.Item label="Manutenção" value="Manutenção" />
-        </Select>
-      </FormControl>
-
-      <FormControl>
-        <FormControl.Label>Peso Inicial (kg)</FormControl.Label>
-        <Input
-          keyboardType="numeric"
-          value={formData.start_weight.toString()}
-          onChangeText={(value) =>
-            setFormData((prev) => ({
-              ...prev,
-              start_weight: Number(value) || 0,
-            }))
-          }
-        />
-      </FormControl>
-
-      <FormControl>
-        <FormControl.Label>Peso Objetivo (kg)</FormControl.Label>
-        <Input
-          keyboardType="numeric"
-          value={formData.goal_weight.toString()}
-          onChangeText={(value) =>
-            setFormData((prev) => ({
-              ...prev,
-              goal_weight: Number(value) || 0,
-            }))
-          }
-        />
-      </FormControl>
-
-      <FormControl>
-        <FormControl.Label>Data de Início</FormControl.Label>
-        <Button onPress={() => setShowDatePicker((prev) => ({ ...prev, start: true }))}>
-          {formData.start_date.toLocaleDateString()}
+          Salvar Meta
         </Button>
-        {showDatePicker.start && (
-          <DateTimePicker
-            value={formData.start_date}
-            mode="date"
-            onChange={handleDateChange('start')}
-          />
-        )}
-      </FormControl>
-
-      <FormControl>
-        <FormControl.Label>Data Final Prevista</FormControl.Label>
-        <Button onPress={() => setShowDatePicker((prev) => ({ ...prev, end: true }))}>
-          {formData.end_date.toLocaleDateString()}
-        </Button>
-        {showDatePicker.end && (
-          <DateTimePicker
-            value={formData.end_date}
-            mode="date"
-            minimumDate={formData.start_date}
-            onChange={handleDateChange('end')}
-          />
-        )}
-      </FormControl>
-
-      <Button mt={4} onPress={handleSubmit}>
-        Salvar Meta
-      </Button>
-    </VStack>
+      </VStack>
+    </Box>
   );
 }
 

@@ -17,6 +17,7 @@ from app.schemas.user import (
     UserDetail,
     UserInfo,
     UserLogin,
+    UserPublication
 )
 from app.service.utils import ImageSaver
 
@@ -228,4 +229,56 @@ class UserService:
         )
         self._session.add(user_publication)
         await self._session.flush()
+        await self._session.commit()
+
+    async def get_publications_progress(self)-> list[UserPublication]:
+        query = text(
+            """select
+                    up.id,
+                    up.user_id,
+                    up."content",
+                    up.image_urls,
+                    up.create_date,
+                    u."name" AS user_name
+                FROM user_progress_posts  up
+                JOIN users u ON up.user_id = u.id
+                WHERE up.is_private  = false
+                    and type_post = 1
+                ORDER BY up.create_date  DESC
+            """
+        )
+        result: CursorResult = await self._session.execute(query)
+        publications = result.fetchall()
+        return [UserPublication(**pub._asdict()) for pub in publications]
+    
+    async def get_publications_suggestions(self) -> list[UserPublication]:
+        query = text(
+            """select
+                    up.id,
+                    up.user_id,
+                    up."content",
+                    up.image_urls,
+                    up.create_date,
+                    u."name" AS user_name
+                FROM user_progress_posts  up
+                JOIN users u ON up.user_id = u.id
+                WHERE up.is_private  = false
+                    and type_post = 2
+                ORDER BY up.create_date  DESC
+            """
+        )
+        result: CursorResult = await self._session.execute(query)
+        publications = result.fetchall()
+        return [UserPublication(**pub._asdict()) for pub in publications]
+
+    async def delete_publication_progress(self, publication_id: int) -> None:
+        await self._session.execute(
+            delete(UserPost).where(UserPost.id == publication_id)
+        )
+        await self._session.commit()
+    
+    async def delete_publication_suggestion(self, publication_id: int) -> None:
+        await self._session.execute(
+            delete(UserPost).where(UserPost.id == publication_id)
+        )
         await self._session.commit()

@@ -16,6 +16,7 @@ from app.schemas.workout_plans import (
     UpdateWorkoutPlan,
     WorkoutPlan,
     WorkoutPlanData,
+    WorkoutPlanCalendar,
 )
 
 
@@ -261,6 +262,12 @@ class WorkoutPlanService:
             )
         )
         await self._session.commit()
+    
+    async def get_period_workout_plan(
+        self, user_id: int
+    ) -> WorkoutPlanCalendar | None:
+        workout_plan = await self._query.get_period_workout_plan_by_user_id(user_id)
+        return workout_plan
 
     @staticmethod
     def __calculate_end_date(
@@ -357,3 +364,26 @@ class WorkoutPlanQuerys:
             )
         )
         return result.one_or_none()
+
+    async def get_period_workout_plan_by_user_id(
+        self, user_id: int
+    ) -> WorkoutPlanCalendar:
+        query = text("""
+            select
+                wp.id,
+                ut.start_date,
+                ut.end_date,
+                ut.time_to_workout,
+                wp.days_per_week
+            from workout_plans wp
+            join user_trainings ut
+                on ut.workout_plan_id = wp.id
+            join users u
+                on u.id = ut.user_id
+            where u.id = :id
+            and ut.is_completed = false
+            and ut.is_actual = true
+        """).bindparams(bindparam("id", user_id))
+        result = await self._session.execute(query)
+        workout_plan = result.fetchone()
+        return WorkoutPlanCalendar(**workout_plan._asdict()) if workout_plan else None

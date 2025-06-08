@@ -6,9 +6,9 @@ from app.dependency.auth import AuthManager
 from app.dependency.database import SessionConnection
 from app.modules.basic_response import BasicResponse
 from app.routers.controller.healtGold import HealthGoldController
-from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold
+from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold, HealthGoldSchema
 from app.schemas.user import UserInfo
-
+from app.core.db_model import HealthGold
 router_health_gold = APIRouter(prefix="/health_gold", tags=["health_gold"])
 
 
@@ -33,6 +33,7 @@ async def update_health_gold(
     )
 
 
+
 @router_health_gold.delete("/{gold_id}")
 async def delete_health_gold(
     gold_id: int,
@@ -46,8 +47,10 @@ async def delete_health_gold(
 async def get_health_gold_by_user(
     session: AsyncSession = Depends(SessionConnection.session),
     user: UserInfo = Depends(AuthManager.has_authorization),
-) -> BasicResponse[list]:
+) -> BasicResponse[list[HealthGoldSchema]]:
     return await HealthGoldController(session, user).get_health_gold_by_user()
+
+
 
 
 @router_health_gold.get("/{gold_id}")
@@ -55,5 +58,5 @@ async def get_health_gold_by_id(
     gold_id: int,
     session: AsyncSession = Depends(SessionConnection.session),
     user: UserInfo = Depends(AuthManager.has_authorization),
-) -> BasicResponse[None]:
+) -> BasicResponse[HealthGoldSchema]:
     return await HealthGoldController(session, user).get_health_gold_by_id(gold_id)

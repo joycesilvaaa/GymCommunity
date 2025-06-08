@@ -89,3 +89,11 @@ class PreviousWorkoutPlan(BaseModel):
     title: str
     description: str
     professional_name: str | None = None
+
+
+class WorkoutPlanCalendar(BaseModel):
+    id: int
+    start_date: datetime
+    end_date: datetime
+    days_per_week: int
+    time_to_workout: str

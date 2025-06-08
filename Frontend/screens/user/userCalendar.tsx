@@ -4,18 +4,10 @@ import { Box, Text, HStack, VStack, Spinner, Circle } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { useAuth } from '@/hooks/auth';
+import { TrainingSchedule } from '@/interfaces/workout_plans';
+import { DietSchedule } from '@/interfaces/diet';
+import routes from '@/api/api';
 
-// Tipos para os dados de treino e dieta
-type TrainingSchedule = {
-  startDate: string;
-  endDate: string;
-  daysPerWeek: number; // Número de dias por semana para treino (ex: 4)
-};
-
-type DietSchedule = {
-  startDate: string;
-  endDate: string;
-};
 
 type MarkedDates = {
   [date: string]: {
@@ -81,64 +73,25 @@ function UserCalendar({ navigation }: NavigationProps) {
     today: 'Hoje',
   };
   LocaleConfig.defaultLocale = 'pt-br';
-  
-  const fetchUserSchedule = async () => {
-    setLoading(true);
 
-    // Usando datas atuais para melhor visualização
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
-    // Definir data de início para o primeiro dia do mês atual
-    const startDate = new Date(currentYear, currentMonth, 1);
-    // Definir data de fim para o último dia do mês seguinte
-    const endDate = new Date(currentYear, currentMonth + 2, 0);
-
-    // Formato de string para as datas (YYYY-MM-DD)
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
-
-    // Simulando uma chamada de API
-    setTimeout(() => {
-      // Dados mockados que simulariam a resposta do backend
-      const mockTrainingSchedule: TrainingSchedule = {
-        startDate: startDateStr,
-        endDate: endDateStr,
-        daysPerWeek: 4, // Agora recebemos apenas o número de dias por semana
-      };
-
-      const mockDietSchedule: DietSchedule = {
-        startDate: startDateStr,
-        endDate: endDateStr,
-      };
-
-      setTrainingSchedule(mockTrainingSchedule);
-      setDietSchedule(mockDietSchedule);
-
-      // Processar as datas para marcar no calendário
-      processScheduleDates(mockTrainingSchedule, mockDietSchedule);
-
+    const fetchUserSchedule = async () => {
+      setLoading(true);
+      const dietScheduleResponse: any = await routes.periodDiet();
+      setDietSchedule(dietScheduleResponse.data.data); // fix: use .data.data
+      const trainingScheduleResponse: any = await routes.periodWorkout();
+      setTrainingSchedule(trainingScheduleResponse.data.data); // fix: use .data.data
+      console.log('Training Schedule:', trainingScheduleResponse.data.data);
+      console.log('Diet Schedule:', dietScheduleResponse.data.data);
+      processScheduleDates(trainingScheduleResponse.data.data ?? null, dietScheduleResponse.data.data ?? null);
       setLoading(false);
-    }, 1000);
-  };
-
-  // Função para distribuir os dias de treino na semana
-  const distributeDaysInWeek = (daysPerWeek: number): number[] => {
-    // Distribuir os dias de forma equilibrada
-    // Começamos com segunda-feira (1) até completar o número de dias solicitado
-    const weekDays: number[] = [];
-
-    // Se tiver 7 dias, usar todos
-    if (daysPerWeek >= 7) {
-      return [0, 1, 2, 3, 4, 5, 6]; // Domingo a Sábado
     }
 
-    // Para outros casos, distribuir uniformemente
-    // Exemplo para 4 dias: segunda, terça, quinta, sexta
-    // Exemplo para 3 dias: segunda, quarta, sexta
-    // Exemplo para 2 dias: terça, quinta
+  const distributeDaysInWeek = (daysPerWeek: number): number[] => {
+    const weekDays: number[] = [];
 
+    if (daysPerWeek >= 7) {
+      return [0, 1, 2, 3, 4, 5, 6];
+    }
     if (daysPerWeek === 1) {
       return [3]; // Quarta-feira
     } else if (daysPerWeek === 2) {
@@ -155,18 +108,17 @@ function UserCalendar({ navigation }: NavigationProps) {
 
     return weekDays;
   };
-
-  // Função para processar e marcar as datas no calendário
+  
   const processScheduleDates = (training: TrainingSchedule, diet: DietSchedule) => {
     const marked: MarkedDates = {};
 
     // Processar datas de treino
     if (training) {
       // Distribuir os dias de treino na semana
-      const weekDays = distributeDaysInWeek(training.daysPerWeek);
+      const weekDays = distributeDaysInWeek(training.days_per_week);
 
-      const startDate = new Date(training.startDate);
-      const endDate = new Date(training.endDate);
+      const startDate = new Date(training.start_date);
+      const endDate = new Date(training.end_date);
 
       // Resto da lógica permanece igual, mas agora usamos weekDays calculado
       for (let day = new Date(startDate); day <= endDate; day.setDate(day.getDate() + 1)) {
@@ -183,8 +135,8 @@ function UserCalendar({ navigation }: NavigationProps) {
 
     // Processar datas de dieta
     if (diet) {
-      const startDate = new Date(diet.startDate);
-      const endDate = new Date(diet.endDate);
+      const startDate = new Date(diet.start_date);
+      const endDate = new Date(diet.end_date);
 
       for (let day = new Date(startDate); day <= endDate; day.setDate(day.getDate() + 1)) {
         const dateString = day.toISOString().split('T')[0];
@@ -206,16 +158,11 @@ function UserCalendar({ navigation }: NavigationProps) {
         }
       }
     }
-
-    console.log('Datas marcadas:', marked);
     setMarkedDates(marked);
-  };
+  }
 
   const handleDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
-
-    // Você pode implementar aqui uma lógica para mostrar detalhes do dia selecionado
-    // Por exemplo, detalhes do treino ou da dieta para aquele dia específico
   };
 
   return (
@@ -335,10 +282,10 @@ function UserCalendar({ navigation }: NavigationProps) {
               <VStack space={2}>
                 <Text>
                   <Text fontWeight="bold">Treino: </Text>
-                  {trainingSchedule?.startDate && trainingSchedule?.endDate ? (
+                  {trainingSchedule?.start_date && trainingSchedule?.end_date ? (
                     <Text>
-                      {new Date(trainingSchedule.startDate).toLocaleDateString('pt-BR')} até{' '}
-                      {new Date(trainingSchedule.endDate).toLocaleDateString('pt-BR')}
+                      {new Date(trainingSchedule.start_date).toLocaleDateString('pt-BR')} até{' '}
+                      {new Date(trainingSchedule.end_date).toLocaleDateString('pt-BR')}
                     </Text>
                   ) : (
                     <Text>Nenhum plano de treino ativo</Text>
@@ -347,10 +294,10 @@ function UserCalendar({ navigation }: NavigationProps) {
 
                 <Text>
                   <Text fontWeight="bold">Dias de treino: </Text>
-                  {trainingSchedule?.daysPerWeek ? (
+                  {trainingSchedule?.days_per_week ? (
                     <Text>
-                      {trainingSchedule.daysPerWeek} dias por semana
-                      {distributeDaysInWeek(trainingSchedule.daysPerWeek)
+                      {trainingSchedule.days_per_week} dias por semana
+                      {distributeDaysInWeek(trainingSchedule.days_per_week)
                         .map((day) => {
                           const weekDay = [
                             'Domingo',
@@ -373,10 +320,10 @@ function UserCalendar({ navigation }: NavigationProps) {
 
                 <Text>
                   <Text fontWeight="bold">Dieta: </Text>
-                  {dietSchedule?.startDate && dietSchedule?.endDate ? (
+                  {dietSchedule?.start_date && dietSchedule?.end_date ? (
                     <Text>
-                      {new Date(dietSchedule.startDate).toLocaleDateString('pt-BR')} até{' '}
-                      {new Date(dietSchedule.endDate).toLocaleDateString('pt-BR')}
+                      {new Date(dietSchedule.start_date).toLocaleDateString('pt-BR')} até{' '}
+                      {new Date(dietSchedule.end_date).toLocaleDateString('pt-BR')}
                     </Text>
                   ) : (
                     <Text>Nenhum plano de dieta ativo</Text>

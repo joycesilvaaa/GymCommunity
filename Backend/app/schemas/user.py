@@ -89,7 +89,7 @@ class UpdateUserPublication(BaseModel):
 class UserPublication(BaseModel):
     id: int
     user_id: int
+    user_name: str
     content: str
-    image_urls: list[str] | None = None
-    is_private: bool = False
-    created_at: datetime
+    image_urls: list[str] | None = []
+    create_date: datetime

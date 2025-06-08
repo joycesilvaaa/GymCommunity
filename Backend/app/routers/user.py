@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Body, Depends, File, UploadFile
+from fastapi import APIRouter, Body, Depends, File, UploadFile, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependency.auth import AuthManager
@@ -15,6 +15,7 @@ from app.schemas.user import (
     UpdateUser,
     UserDetail,
     UserInfo,
+    UserPublication,
 )
 
 router_user = APIRouter(tags=["user"], prefix="/user")
@@ -98,21 +99,35 @@ async def get_ranking_points(
     return await UserController(session, user).get_ranking_points()
 
 
+from fastapi import Form, File, UploadFile
+
 @router_user.post("/user-publication-progress")
 async def create_user_publication(
-    form_data: CreateUserPublication = Depends(),
+    content: str = Form(...),
+    is_private: bool = Form(default=False),
     image_files: list[UploadFile] = File(default_factory=list),
     session: AsyncSession = Depends(SessionConnection.session),
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
+    form_data = CreateUserPublication(
+        content=content,
+        is_private=is_private,
+    )
     return await UserController(session, user).create_publication_progress(
         form_data, image_files
     )
 
+@router_user.get("/user-publication-progress/all")
+async def get_all_user_publications(
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[list[UserPublication]]:
+    return await UserController(session, user).get_user_publications_progress()
+
 
 @router_user.post("/user-publication-suggestion")
 async def create_user_publication_suggestion(
-    form_data: CreateUserPostSuggestion = Depends(),
+    form_data: CreateUserPostSuggestion = Body(...),
     session: AsyncSession = Depends(SessionConnection.session),
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
@@ -120,6 +135,12 @@ async def create_user_publication_suggestion(
         form_data
     )
 
+@router_user.get("/user-publication-suggestion/all")
+async def get_all_user_publication_suggestions(
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[list[UserPublication]]:
+    return await UserController(session, user).get_user_publications_suggestions()
 
 @router_user.delete("/{user_id}")
 async def delete_relations(
@@ -128,3 +149,19 @@ async def delete_relations(
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
     return await UserController(session, user).delete_relation(user_id)
+
+@router_user.delete("/user-publication-progress/{publication_id}")
+async def delete_user_publication(
+    publication_id: int,
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[None]:
+    return await UserController(session, user).delete_publication_progress(publication_id)
+
+@router_user.delete("/user-publication-suggestion/{publication_id}")
+async def delete_user_publication_suggestion(
+    publication_id: int,
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[None]:
+    return await UserController(session, user).delete_publication_suggestions(publication_id)

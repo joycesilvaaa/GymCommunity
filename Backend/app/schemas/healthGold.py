@@ -4,6 +4,17 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class HealthGoldSchema(BaseModel):
+    id: int
+    goal_type: str
+    start_weight: float
+    goal_weight: float
+    end_weight: float
+    start_date: datetime
+    end_date: datetime
+
+
+
 class CreateHealthGold(BaseModel):
     goal_type: str
     start_weight: float

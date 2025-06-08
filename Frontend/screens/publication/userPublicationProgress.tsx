@@ -4,7 +4,6 @@ import {
   Text,
   View,
   Box,
-  Fab,
   Icon,
   Spinner,
   Pressable,
@@ -17,19 +16,14 @@ import { useAuth } from '@/hooks/auth';
 import { RenderPostProgressItem } from '@/components/card/postProgress';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-
-type PublicationImage = {
-  url: string;
-};
+import routes from '@/api/api';
 
 type Publication = {
   id: number;
-  created_at: string;
+  user_name: string;
   content: string;
-  user_id: number;
-  images?: PublicationImage[];
-  user_name?: string;
-  user_avatar?: string;
+  image_urls?: string[];
+  create_date: string;
 };
 
 function PublicationProgress({ navigation }: NavigationProps) {
@@ -38,12 +32,9 @@ function PublicationProgress({ navigation }: NavigationProps) {
   };
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // State para nova publicação
   const [newContent, setNewContent] = useState('');
   const [newImages, setNewImages] = useState<string[]>([]);
 
-  // Helper para selecionar imagem da galeria
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
@@ -60,29 +51,51 @@ function PublicationProgress({ navigation }: NavigationProps) {
     }
   };
 
-  // Remover imagem pelo índice
   const removeImage = (idx: number) => {
     setNewImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // Salvar nova publicação
-  const handleSavePublication = () => {
-    if (!newContent.trim()) return;
-    const newPub: Publication = {
-      id: Date.now(),
-      created_at: new Date().toISOString().split('T')[0],
-      content: newContent,
-      user_id: user?.id ?? 0,
-      user_name: user?.name ?? 'Usuário',
-      user_avatar: user?.avatar_url ?? 'https://randomuser.me/api/portraits/lego/1.jpg',
-      images: newImages.map((url) => ({ url })),
-    };
-    setPublications((prev) => [newPub, ...prev]);
+const handleSavePublication = async () => {
+  if (!newContent.trim()) return;
+
+  try {
+    const formData = new FormData();
+
+    // Adiciona o campo do formulário normalmente (como o FastAPI espera)
+    formData.append('content', newContent); // <- aqui deve coincidir com o nome dos campos do Pydantic
+
+    // Adiciona as imagens
+    newImages.forEach((uri, idx) => {
+      const name = uri.split('/').pop() || `image_${idx}.jpg`;
+      formData.append('image_files', {
+        uri,
+        name,
+        type: 'image/jpeg',
+      } as any);
+    });
+
+    // Envia
+    await routes.postUserPublicationProgress(formData);
+
+    // Atualiza estado (sucesso)
+    setPublications((prev) => [
+      {
+        id: Date.now(),
+        user_name: user?.name ?? 'Usuário',
+        content: newContent,
+        image_urls: newImages,
+        create_date: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
     setNewContent('');
     setNewImages([]);
-  };
+  } catch (err) {
+    console.error('Erro ao publicar progresso:', err);
+  }
+};
 
-  // Função para apagar publicação
+
   const handleDeletePublication = (id: number) => {
     setPublications((prev) => prev.filter((pub) => pub.id !== id));
   };
@@ -91,43 +104,23 @@ function PublicationProgress({ navigation }: NavigationProps) {
     fetchPublications();
   }, []);
 
-  function fetchPublications() {
-    setTimeout(() => {
-      const mockPublications: Publication[] = [
-        {
-          id: 1,
-          created_at: '2023-10-01',
-          content:
-            'Finalmente atingi minha meta de perda de peso! Perdi 10kg em 3 meses com dieta equilibrada e treinos regulares.',
-          user_id: 1,
-          user_name: user?.name || 'Ana Silva',
-          user_avatar: user?.avatar_url || 'https://randomuser.me/api/portraits/women/32.jpg',
-          images: [{ url: 'https://picsum.photos/400/300?fitness' }],
-        },
-        {
-          id: 2,
-          created_at: '2023-10-02',
-          content:
-            'Hoje completei meu primeiro triathlon! A sensação de superação é indescritível.',
-          user_id: 2,
-          user_name: 'Carlos Oliveira',
-          user_avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-          images: [{ url: 'https://picsum.photos/400/300?sports' }],
-        },
-        {
-          id: 3,
-          created_at: '2023-10-03',
-          content:
-            'Progresso nos músculos dorsais após 6 meses de treino focado. A consistência realmente traz resultados!',
-          user_id: 3,
-          user_name: user?.name || 'Mariana Costa',
-          user_avatar: user?.avatar_url || 'https://randomuser.me/api/portraits/women/44.jpg',
-          images: [{ url: 'https://picsum.photos/400/300?gym' }],
-        },
-      ];
-      setPublications(mockPublications);
-      setLoading(false);
-    }, 1000);
+  async function fetchPublications() {
+    setLoading(true);
+    try {
+      const response = await routes.getUserPublicationProgress();
+      const data = (response.data?.data || []).map((pub: any) => ({
+        id: pub.id,
+        user_name: pub.user_name,
+        content: pub.content,
+        image_urls: pub.image_urls || [],
+        create_date: pub.create_date,
+      }));
+      setPublications(data);
+    } catch (error) {
+      console.error('Erro ao buscar publicações:', error);
+      setPublications([]);
+    }
+    setLoading(false);
   }
 
   return (
@@ -136,7 +129,6 @@ function PublicationProgress({ navigation }: NavigationProps) {
         <View flex={1} p={0}>
           {user && (
             <Box mb={4} alignItems="center">
-              {/* Formulário de nova publicação */}
               <Box bg="white" p={6} borderRadius={16} width="100%" maxWidth={500} shadow={1}>
                 <Text fontSize="lg" fontWeight="bold" mb={4}>
                   Nova Publicação de Progresso
@@ -252,11 +244,13 @@ function PublicationProgress({ navigation }: NavigationProps) {
                   bg="white"
                   borderRadius="md"
                   overflow="hidden"
-                  // espaço para o botão não sobrepor conteúdo
                 >
                   <RenderPostProgressItem
                     item={{
                       ...publication,
+                      created_at: publication.create_date || '',
+                      user_id: 0,
+                      images: (publication.image_urls || []).map((url) => ({ url })),
                       handle: () => handleDeletePublication(publication.id),
                     }}
                     index={0}

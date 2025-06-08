@@ -16,6 +16,7 @@ from app.schemas.diet import (
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
+    DietPeriodCalendar,
 )
 
 
@@ -237,6 +238,34 @@ class DietService:
         await self._session.flush()
         await self._session.commit()
 
+    async def get_period_diet_by_user(
+        self, user_id: int
+    ) -> DietPeriodCalendar | None:
+        query = text("""
+            select
+                d.id,
+                ud.start_date,
+                ud.end_date,
+                (
+                    select jsonb_agg(elem->>'time_to_eat')
+                    from jsonb_array_elements(d.menu::jsonb) as elem
+                ) as horarios
+            from diets d
+            join user_diets ud
+                on d.id = ud.diet_id
+            join users u
+                on u.id = ud.user_id
+            where u.id = :id
+            and ud.is_completed is false
+            and d.is_deleted = false
+            and ud.is_actual = true
+        """).bindparams(bindparam("id", user_id))
+        result = await self._session.execute(query)
+        diet = result.fetchone()
+        return DietPeriodCalendar(**diet._asdict()) if diet else None
+
     @staticmethod
     def __calcule_diet_end_date(start_date: datetime, months_valid: int) -> str:
         return start_date + relativedelta(months=months_valid)
+
+

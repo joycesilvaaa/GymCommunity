@@ -12,6 +12,7 @@ from app.service.user import (
     RankingPoints,
     UpdateUser,
     UserDetail,
+     UserPublication,
     UserService,
 )
 
@@ -134,6 +135,42 @@ class UserController:
             await self._service.create_user_publication_suggestions(
                 self._user.id, form_data
             )
+            return BasicResponse(data=None)
+        except Exception as e:
+            raise e
+        
+    async def get_user_publications_progress(
+            self
+    )-> BasicResponse[list[UserPublication]]:
+        try:
+            publications = await self._service.get_publications_progress()
+            return BasicResponse[list[UserPublication]](data=publications)
+        except Exception as e:
+            raise e
+    
+    async def get_user_publications_suggestions(
+            self
+    ) -> BasicResponse[list[UserPublication]]:
+        try:
+            publications = await self._service.get_publications_suggestions()
+            return BasicResponse[list[UserPublication]](data=publications)
+        except Exception as e:
+            raise e
+    
+    async def delete_publication_progress(
+        self, publication_id: int
+    ) -> BasicResponse[None]:
+        try:
+            await self._service.delete_publication_progress(publication_id)
+            return BasicResponse(data=None)
+        except Exception as e:
+            raise e
+        
+    async def delete_publication_suggestions(
+        self, publication_id: int
+    ) -> BasicResponse[None]:
+        try:
+            await self._service.delete_publication_suggestion(publication_id)
             return BasicResponse(data=None)
         except Exception as e:
             raise e

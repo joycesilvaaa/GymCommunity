@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import bindparam, delete, text, update
 
 from app.core.db_model import HealthGold
-from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold
+from app.schemas.healthGold import CreateHealthGold, UpdateHealthGold, HealthGoldSchema
 from app.schemas.user import UserInfo
 
 
@@ -49,13 +49,11 @@ class HealthGoldService:
         )
         await self._session.commit()
 
-    async def get_health_gold_by_user(self) -> list[HealthGold]:
+    async def get_health_gold_by_user(self) -> list[HealthGoldSchema]:
         health_gold = await self._querys.get_health_gold_by_user(self._user.id)
-        if not health_gold:
-            raise HTTPException(status_code=404, detail="Health Gold não encontrado")
         return health_gold
 
-    async def get_health_gold_by_id(self, gold_id: int) -> HealthGold:
+    async def get_health_gold_by_id(self, gold_id: int) -> HealthGoldSchema:
         health_gold = await self._querys.get_health_gold_by_id(gold_id)
         if not health_gold:
             raise HTTPException(status_code=404, detail="Health Gold não encontrado")
@@ -66,24 +64,24 @@ class HealthGoldQuerys:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_health_gold_by_id(self, gold_id: int) -> HealthGold | None:
+    async def get_health_gold_by_id(self, gold_id: int) -> HealthGoldSchema | None:
         query = text("""
             SELECT *
-            FROM health_gold
+            FROM health_goals
             WHERE id = :gold_id
         """).bindparams(bindparam("gold_id", gold_id))
         result = await self._session.execute(query)
         health_gold = result.fetchone()
         if not health_gold:
             raise HTTPException(status_code=404, detail="Health Gold não encontrado")
-        return HealthGold(**health_gold._asdict())
+        return HealthGoldSchema(**health_gold._asdict())
 
-    async def get_health_gold_by_user(self, user_id: int) -> list[HealthGold]:
+    async def get_health_gold_by_user(self, user_id: int) -> list[HealthGoldSchema]:
         query = text("""
             SELECT *
-            FROM health_gold
+            FROM health_goals
             WHERE user_id = :user_id
         """).bindparams(bindparam("user_id", user_id))
         result = await self._session.execute(query)
         health_gold = result.fetchall()
-        return [HealthGold(**gold._asdict()) for gold in health_gold]
+        return [HealthGoldSchema(**gold._asdict()) for gold in health_gold]

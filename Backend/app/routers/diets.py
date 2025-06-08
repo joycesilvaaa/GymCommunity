@@ -16,6 +16,7 @@ from app.schemas.diet import (
     LastFinishedDiet,
     ListDietActual,
     UpdateDiet,
+    DietPeriodCalendar,
 )
 from app.schemas.user import UserInfo
 
@@ -92,6 +93,14 @@ async def get_all_free_diets(
     session: AsyncSession = Depends(SessionConnection.session),
 ) -> BasicResponse[list[AllFreeDiets]]:
     return await DietController(session).get_all_free_diets()
+
+
+@router_diets.get("/period")
+async def get_period_calendar(
+    session: AsyncSession = Depends(SessionConnection.session),
+    user: UserInfo = Depends(AuthManager.has_authorization),
+) -> BasicResponse[DietPeriodCalendar | None]:
+    return await DietController(session).get_period_diet(user)
 
 
 @router_diets.put("/{diet_id}")

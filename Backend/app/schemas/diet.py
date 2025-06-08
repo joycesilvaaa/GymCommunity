@@ -87,3 +87,10 @@ class AllExpiredDiets(BaseModel):
     user_id: int
     diet_id: int
     days_remaining: int
+
+
+class DietPeriodCalendar(BaseModel):
+    id: int
+    start_date: datetime
+    end_date: datetime
+    horarios: list[str] = []

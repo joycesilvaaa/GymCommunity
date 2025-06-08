@@ -58,3 +58,11 @@ export interface WorkoutData {
     type: string;
     plans: WorkoutPlan[];
 }
+
+export interface TrainingSchedule{
+  id: number
+  start_date: Date;
+  end_date: Date;
+  days_per_week: number;
+  time_to_workout: string;
+}

@@ -170,11 +170,10 @@ export function StackNavigator() {
             component={UserCalendar}
             options={{ headerShown: false }}    
           />
-           
           </>
         ) : (
           <>
-            {/* <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
+            <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
             <Stack.Screen
               name="CreateUser"
@@ -186,13 +185,6 @@ export function StackNavigator() {
               component={CreateProfissional}
               options={{ headerShown: false }}
             />
-              */}
-                        <Stack.Screen
-            name="MyCalendar"
-            component={UserCalendar}
-            options={{ headerShown: false }}    
-          />
-           
           </>
         )}
       </Stack.Navigator>
