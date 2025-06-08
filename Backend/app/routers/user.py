@@ -6,6 +6,7 @@ from app.dependency.auth import AuthManager
 from app.dependency.database import SessionConnection
 from app.modules.basic_response import BasicResponse
 from app.routers.controller.user import UserController
+from app.routers.controller.images import ImageController
 from app.schemas.user import (
     ClientInfo,
     CreateUser,
@@ -100,6 +101,7 @@ async def get_ranking_points(
 
 
 from fastapi import Form, File, UploadFile
+from fastapi.responses import FileResponse
 
 @router_user.post("/user-publication-progress")
 async def create_user_publication(
@@ -165,3 +167,9 @@ async def delete_user_publication_suggestion(
     user: UserInfo = Depends(AuthManager.has_authorization),
 ) -> BasicResponse[None]:
     return await UserController(session, user).delete_publication_suggestions(publication_id)
+
+@router_user.get("/image/{image_path:path}", response_model=None)
+async def get_image(
+    image_path: str,
+) -> FileResponse | None:
+    return await ImageController().get_image(image_path)

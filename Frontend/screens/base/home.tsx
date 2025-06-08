@@ -78,7 +78,7 @@ export function Home({ navigation }: NavigationProps) {
       description: actualDietPrevius 
         ? `Dia inicial: ${formatedDateBr(actualDietPrevius.start_date)}\nDia final: ${formatedDateBr(actualDietPrevius.end_date)}`
         : 'Sem dieta atual. Clique para criar uma nova dieta',
-      icon: <MaterialIcons name="restaurant" />,
+      icon: <MaterialIcons name="restaurant-menu" />, // alterado de "restaurant"
       screen: actualDietPrevius ? 'ViewDiet' : 'CreateDiet',
       id: actualDietPrevius?.id,
     },
@@ -87,49 +87,49 @@ export function Home({ navigation }: NavigationProps) {
       description: actualWorkoutPrevius
         ? `Dia inicial: ${formatedDateBr(actualWorkoutPrevius.start_date)}\nDia final: ${formatedDateBr(actualWorkoutPrevius.end_date)}`
         : 'Sem treino atual. Clique para criar um novo treino',
-      icon: <MaterialIcons name="fitness-center" />,
+      icon: <MaterialIcons name="sports-gymnastics" />, // alterado de "fitness-center"
       screen:actualWorkoutPrevius? 'ViewWourkout': 'CreateWorkout', 
     },
     {
       type: 'Meu Calendario',
       description:"Visualize seu calendário de treinos e dietas",
-      icon: <MaterialIcons name="fitness-center" />,
+      icon: <MaterialIcons name="calendar-today" />, // alterado de "fitness-center"
       screen:"MyCalendar", 
     },
     {
       type: 'Metas',
       description: 'Visualize suas metas',
-      icon: <MaterialIcons name="flag" />,
+      icon: <MaterialIcons name="emoji-events" />, // alterado de "flag"
       screen: 'HealthGoals',
     },
     {
       type: 'Lista de Compras',
       description: 'Visualize suas listas de compras',
-      icon: <MaterialIcons name="shopping-cart" />,
+      icon: <MaterialIcons name="shopping-basket" />, // alterado de "shopping-cart"
       screen: 'ShoppingList',
     },
     {
       type: 'Ranking de Pontos',
       description: 'Visualize o ranking de pontos',
-      icon: <MaterialIcons name="directions-run" />,
+      icon: <MaterialIcons name="star" />, // alterado de "directions-run"
       screen: 'UserPoints',
     },
     {
       type: 'Dietas Gratuitas',
       description: `Quantidade de dietas disponíveis: ${quantityFreeDiets}`,
-      icon: <MaterialIcons name="local-dining" />,
+      icon: <MaterialIcons name="free-breakfast" />, // alterado de "local-dining"
       screen: quantityFreeDiets > 0 ? 'AllFreeDiets' : 'Home',
     },
     {
       type: 'Treinos Gratuitos',
       description: `Quantidade de treinos disponíveis: ${quantityFreeWorkout}`,
-      icon: <MaterialIcons name="directions-run" />,
+      icon: <MaterialIcons name="sports-handball" />, // alterado de "directions-run"
       screen: quantityFreeWorkout > 0 ? 'AllFreeWorkout' : 'Home',
     },
     {
       type: 'Dicas',
       description: 'Visualize dicas de treinos e dietas',
-      icon: <MaterialIcons name="directions-run" />,
+      icon: <MaterialIcons name="lightbulb" />, // alterado de "directions-run"
       screen: "PublicationSuggestion", 
     }
   ];

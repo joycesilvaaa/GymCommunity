@@ -85,7 +85,8 @@ const routes = {
     getUserPublicationSuggestion: () => api.get(`/user/user-publication-suggestion/all`),
     deletePublicationSuggestion: (id: number) => api.delete(`/user/user-publication-suggestion/${id}`),
     deletePublicationProgress: (id: number) => api.delete(`/user/user-publication-progress/${id}`),
-    
+    getImagePublication:(image_path: string) => {
+        return api.get(`/user/image/${image_path}`,)}
 }
  
 export default routes;

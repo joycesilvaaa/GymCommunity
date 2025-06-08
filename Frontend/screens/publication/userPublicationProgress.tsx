@@ -20,6 +20,7 @@ import routes from '@/api/api';
 
 type Publication = {
   id: number;
+  user_id?: number;
   user_name: string;
   content: string;
   image_urls?: string[];
@@ -96,7 +97,8 @@ const handleSavePublication = async () => {
 };
 
 
-  const handleDeletePublication = (id: number) => {
+  const handleDeletePublication = async (id: number) => {
+    await routes.deletePublicationProgress(id);
     setPublications((prev) => prev.filter((pub) => pub.id !== id));
   };
 
@@ -111,6 +113,7 @@ const handleSavePublication = async () => {
       const data = (response.data?.data || []).map((pub: any) => ({
         id: pub.id,
         user_name: pub.user_name,
+        user_id: pub.user_id,
         content: pub.content,
         image_urls: pub.image_urls || [],
         create_date: pub.create_date,
@@ -249,7 +252,7 @@ const handleSavePublication = async () => {
                     item={{
                       ...publication,
                       created_at: publication.create_date || '',
-                      user_id: 0,
+                      user_id: publication.user_id || 0,
                       images: (publication.image_urls || []).map((url) => ({ url })),
                       handle: () => handleDeletePublication(publication.id),
                     }}
